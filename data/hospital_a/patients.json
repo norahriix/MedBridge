@@ -1,0 +1,15 @@
+
+[
+  {
+    "patient_id": "A100",
+    "patient_name": "Sara Ahmed",
+    "dob": "1995-04-10",
+    "sex": "F"
+  },
+  {
+    "patient_id": "A101",
+    "patient_name": "Omar Ali",
+    "dob": "1988-07-22",
+    "sex": "M"
+  }
+]
