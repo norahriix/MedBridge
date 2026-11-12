@@ -1,0 +1,12 @@
+
+male:
+  - M
+  - Male
+
+female:
+  - F
+  - Female
+
+unknown:
+  - U
+  - Unknown
