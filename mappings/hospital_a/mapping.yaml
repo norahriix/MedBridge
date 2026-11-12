@@ -1,0 +1,6 @@
+
+fields:
+  patient_id: source_patient_id
+  patient_name: name
+  dob: birth_date
+  sex: gender

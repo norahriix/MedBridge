@@ -1,0 +1,6 @@
+
+fields:
+  record_no: source_patient_id
+  fullName: name
+  birthDate: birth_date
+  gender: gender

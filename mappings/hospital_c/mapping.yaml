@@ -1,0 +1,6 @@
+
+fields:
+  patient_code: source_patient_id
+  patient_full_name: name
+  date_of_birth: birth_date
+  patient_gender: gender

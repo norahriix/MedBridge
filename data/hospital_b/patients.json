@@ -1,0 +1,15 @@
+
+[
+  {
+    "record_no": "B200",
+    "fullName": "Sara Ahmed",
+    "birthDate": "1995-04-10",
+    "gender": "Female"
+  },
+  {
+    "record_no": "B201",
+    "fullName": "Lina Hassan",
+    "birthDate": "2000-03-15",
+    "gender": "Female"
+  }
+]
