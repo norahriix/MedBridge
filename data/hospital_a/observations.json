@@ -1,0 +1,18 @@
+[
+    {
+        "observation_id": "OBS001",
+        "patient_id": "A100",
+        "measurement": "weight",
+        "value": 65,
+        "unit": "kg",
+        "date": "2026-11-01"
+    },
+    {
+        "observation_id": "OBS002",
+        "patient_id": "A100",
+        "measurement": "weight",
+        "value": 80,
+        "unit": "kg",
+        "date": "2026-11-01"
+    }
+]

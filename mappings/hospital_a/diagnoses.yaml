@@ -1,0 +1,5 @@
+fields:
+  diagnosis_id: id
+  patient_id: source_patient_id
+  diagnosis_code: code
+  diagnosis_name: description

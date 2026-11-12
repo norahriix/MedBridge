@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 from typing import Literal
 from pydantic import BaseModel, Field, ConfigDict
@@ -80,7 +79,9 @@ class Conflict(MedBridgeModel):
     sources: list[str]
     critical: bool
     status: Literal[
-        "OPEN", "RESOLVED", "NEEDS_HUMAN_REVIEW"
+        "OPEN",
+        "RESOLVED",
+        "NEEDS_HUMAN_REVIEW"
     ] = "OPEN"
 
 
@@ -98,6 +99,15 @@ class ValidationResult(MedBridgeModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class SourceRecord(MedBridgeModel):
+    source: str
+    original: dict
+    mapped: dict
+    normalized: dict
+    provenance: list[Provenance] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+
+
 class PipelineResult(MedBridgeModel):
     run_id: str
     status: Literal["completed", "failed"]
@@ -105,4 +115,6 @@ class PipelineResult(MedBridgeModel):
     matches: list[IdentityMatch] = Field(default_factory=list)
     conflicts: list[Conflict] = Field(default_factory=list)
     resolutions: list[ResolutionResult] = Field(default_factory=list)
+    source_records: list[SourceRecord] = Field(default_factory=list)
+    fhir_resources: list[dict] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)

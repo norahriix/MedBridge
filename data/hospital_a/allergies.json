@@ -1,0 +1,16 @@
+[
+    {
+        "allergy_id": "ALG001",
+        "patient_id": "A100",
+        "allergen": "Penicillin",
+        "reaction": "Skin rash",
+        "allergy_status": "confirmed"
+    },
+    {
+        "allergy_id": "ALG002",
+        "patient_id": "A100",
+        "allergen": "Penicillin",
+        "reaction": "Skin rash",
+        "allergy_status": "unconfirmed"
+    }
+]
