@@ -1,0 +1,7 @@
+fields:
+  observation_id: id
+  patient_id: source_patient_id
+  measurement: type
+  value: value
+  unit: unit
+  date: date

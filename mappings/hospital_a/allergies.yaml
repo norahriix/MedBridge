@@ -1,0 +1,6 @@
+fields:
+  allergy_id: id
+  patient_id: source_patient_id
+  allergen: substance
+  reaction: reaction
+  allergy_status: status

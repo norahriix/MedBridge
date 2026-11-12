@@ -1,0 +1,24 @@
+sources:
+  - name: hospital_a
+    patients: data/hospital_a/patients.json
+    patient_mapping: mappings/hospital_a/mapping.yaml
+
+    observations: data/hospital_a/observations.json
+    observation_mapping: mappings/hospital_a/observations.yaml
+
+    medications: data/hospital_a/medications.json
+    medication_mapping: mappings/hospital_a/medications.yaml
+
+    allergies: data/hospital_a/allergies.json
+    allergy_mapping: mappings/hospital_a/allergies.yaml
+
+    diagnoses: data/hospital_a/diagnoses.json
+    diagnosis_mapping: mappings/hospital_a/diagnoses.yaml
+
+  - name: hospital_b
+    patients: data/hospital_b/patients.json
+    patient_mapping: mappings/hospital_b/mapping.yaml
+
+  - name: hospital_c
+    patients: data/hospital_c/patients.csv
+    patient_mapping: mappings/hospital_c/mapping.yaml

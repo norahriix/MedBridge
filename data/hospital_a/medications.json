@@ -1,0 +1,16 @@
+[
+    {
+        "medication_id": "MED001",
+        "patient_id": "A100",
+        "drug_name": "Metformin",
+        "dosage": "500 mg",
+        "medication_status": "active"
+    },
+    {
+        "medication_id": "MED002",
+        "patient_id": "A100",
+        "drug_name": "Metformin",
+        "dosage": "1000 mg",
+        "medication_status": "active"
+    }
+]
