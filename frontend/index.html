@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MedBridge</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      min-height: 100vh;
+      box-sizing: border-box;
+      display: grid;
+      place-items: center;
+      background: #eef5f4;
+      color: #183832;
+      font-family: system-ui, sans-serif;
+    }
+    main {
+      width: min(100%, 760px);
+      box-sizing: border-box;
+      padding: 32px;
+      background: white;
+      border: 1px solid #d6e6e2;
+      border-radius: 16px;
+    }
+    h1 { margin: 0; }
+    p { color: #48665f; }
+    button {
+      padding: 12px 20px;
+      border: 0;
+      border-radius: 8px;
+      background: #08675b;
+      color: white;
+      font: inherit;
+    }
+    button:enabled { cursor: pointer; }
+    button:disabled { opacity: .65; }
+    #pipeline-status { margin-bottom: 0; }
+    #patient-results { margin-top: 24px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: start; }
+    caption { text-align: start; font-weight: 700; margin-bottom: 12px; }
+    th, td { padding: 10px; text-align: start; border-bottom: 1px solid #d6e6e2; }
+    th { background: #eef5f4; }
+    td:nth-child(2) { white-space: nowrap; }
+    #run-summary:not([hidden]) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 12px;
+      margin: 20px 0 0;
+    }
+    #run-summary div {
+      padding: 12px;
+      background: #eef5f4;
+      border-radius: 8px;
+    }
+    #run-summary dd { margin: 4px 0 0; font-size: 1.35rem; font-weight: 700; }
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      main { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>MedBridge</h1>
+    <p>شغّلي معالجة بيانات المستشفيات لعرض النتائج.</p>
+    <button id="run-pipeline" type="button">تشغيل المعالجة</button>
+    <p id="pipeline-status" role="status" hidden></p>
+    <dl id="run-summary" hidden>
+      <div><dt>المطابقات</dt><dd id="match-count"></dd></div>
+      <div><dt>التعارضات</dt><dd id="conflict-count"></dd></div>
+      <div><dt>موارد FHIR</dt><dd id="fhir-count"></dd></div>
+    </dl>
+    <div id="patient-results" hidden>
+      <table>
+        <caption>نتائج المرضى</caption>
+        <thead>
+          <tr>
+            <th scope="col">الاسم</th>
+            <th scope="col">تاريخ الميلاد</th>
+            <th scope="col">المستشفى</th>
+          </tr>
+        </thead>
+        <tbody id="patient-rows"></tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    const runButton = document.querySelector("#run-pipeline");
+    const status = document.querySelector("#pipeline-status");
+    const results = document.querySelector("#patient-results");
+    const rows = document.querySelector("#patient-rows");
+    const summary = document.querySelector("#run-summary");
+    const matchCount = document.querySelector("#match-count");
+    const conflictCount = document.querySelector("#conflict-count");
+    const fhirCount = document.querySelector("#fhir-count");
+    const hospitalNames = new Map([
+      ["hospital_a", "مستشفى A"],
+      ["hospital_b", "مستشفى B"],
+      ["hospital_c", "مستشفى C"],
+    ]);
+
+    function showPatients(patients) {
+      const patientRows = patients.map((patient) => {
+        const row = document.createElement("tr");
+        const hospitals = (patient.sources ?? [])
+          .map((source) => hospitalNames.get(source) ?? source)
+          .join("، ");
+
+        for (const value of [patient.name, patient.birth_date, hospitals]) {
+          const cell = document.createElement("td");
+          cell.dir = "auto";
+          cell.textContent = value || "—";
+          row.append(cell);
+        }
+
+        return row;
+      });
+
+      rows.replaceChildren(...patientRows);
+      results.hidden = patientRows.length === 0;
+    }
+
+    runButton.addEventListener("click", async () => {
+      runButton.disabled = true;
+      summary.hidden = true;
+      results.hidden = true;
+      status.hidden = false;
+      status.textContent = "جاري تشغيل المعالجة…";
+
+      try {
+        const response = await fetch("/pipeline/run", { method: "POST" });
+        if (!response.ok) {
+          throw new Error("Pipeline request failed");
+        }
+
+        const result = await response.json();
+        if (result.status !== "completed" || !Array.isArray(result.patients)) {
+          throw new Error("Unexpected pipeline result");
+        }
+
+        showPatients(result.patients);
+        matchCount.textContent = result.matches.length;
+        conflictCount.textContent = result.conflicts.length;
+        fhirCount.textContent = result.fhir_resources.length;
+        summary.hidden = false;
+        status.textContent = "اكتملت المعالجة. عدد المرضى: " + result.patients.length;
+      } catch {
+        status.textContent = "تعذر تشغيل المعالجة. جرّبي مرة ثانية.";
+      } finally {
+        runButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
