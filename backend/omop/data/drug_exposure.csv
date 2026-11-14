@@ -1,0 +1,2 @@
+drug_exposure_id,person_id,drug_source_value,drug_exposure_start_date,quantity
+OMOP-M001,OMOP-P001,Sample Medication,2026-11-14,10 mg daily

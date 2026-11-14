@@ -1,0 +1,1 @@
+{"resourceType": "Immunization", "id": "NDJSON-I001", "patient": {"reference": "Patient/NDJSON-P001"}, "status": "completed", "vaccineCode": {"text": "Sample Vaccine"}, "occurrenceDateTime": "2026-11-14"}

@@ -1,0 +1,7 @@
+
+fields:
+  family_history_id: id
+  patient_id: source_patient_id
+  family_condition: condition
+  relationship: relationship
+  notes: notes

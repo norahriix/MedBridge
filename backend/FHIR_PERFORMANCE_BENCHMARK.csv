@@ -1,0 +1,4 @@
+﻿patients_requested,patients_mapped,source_records,observations_mapped,generation_seconds,conversion_seconds,patients_per_second,peak_memory_mb,errors
+1000,1000,3000,3000,0.035,0.482,2073.65,12.3,0
+5000,5000,15000,15000,0.058,2.19,2283.1,61.43,0
+10000,10000,30000,30000,0.172,4.674,2139.3,122.85,0

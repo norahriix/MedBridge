@@ -1,0 +1,1 @@
+{"resourceType": "AllergyIntolerance", "id": "NDJSON-A001", "patient": {"reference": "Patient/NDJSON-P001"}, "code": {"text": "Penicillin"}, "clinicalStatus": "active"}

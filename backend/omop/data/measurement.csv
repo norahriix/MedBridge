@@ -1,0 +1,2 @@
+measurement_id,person_id,measurement_concept_id,measurement_date,value_as_number,unit_source_value
+OMOP-O001,OMOP-P001,Heart Rate,2026-11-14,75,bpm

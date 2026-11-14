@@ -1,0 +1,8 @@
+
+fields:
+  immunization_id: id
+  patient_id: source_patient_id
+  vaccine_name: vaccine
+  vaccination_date: date
+  dose: dose
+  vaccination_status: status

@@ -1,7 +1,13 @@
+
 from canonical.models import (
     Medication,
     Allergy,
     Diagnosis,
+    Procedure,
+    MedicalHistory,
+    Encounter,
+    Immunization,
+    FamilyHistory,
     SourceRecord
 )
 
@@ -15,7 +21,12 @@ import yaml
 CLINICAL_MODELS = {
     "medications": Medication,
     "allergies": Allergy,
-    "diagnoses": Diagnosis
+    "diagnoses": Diagnosis,
+    "procedures": Procedure,
+    "medical_history": MedicalHistory,
+    "encounters": Encounter,
+    "immunizations": Immunization,
+    "family_history": FamilyHistory
 }
 
 
@@ -26,6 +37,11 @@ def process_clinical_records(
     patients,
     record_type
 ):
+
+    if record_type not in CLINICAL_MODELS:
+        raise ValueError(
+            f"Unsupported clinical record type: {record_type}"
+        )
 
     records = read_source(str(data_path))
 
@@ -53,14 +69,34 @@ def process_clinical_records(
             mapped = map_record(record, mapping)
             normalized = mapped.copy()
 
-            for field in ["name", "substance", "description", "dose", "reaction"]:
+            text_fields = [
+                "name",
+                "substance",
+                "description",
+                "dose",
+                "reaction",
+                "procedure_type",
+                "outcome",
+                "notes",
+                "condition",
+                "code",
+                "status",
+                "encounter_type",
+                "reason",
+                "diagnosis",
+                "location",
+                "vaccine",
+                "relationship"
+            ]
 
+            for field in text_fields:
                 if isinstance(normalized.get(field), str):
                     normalized[field] = normalized[field].strip()
 
             if isinstance(normalized.get("status"), str):
                 normalized["status"] = (
                     normalized["status"].strip().lower()
+                    or "unknown"
                 )
 
             for original_field, canonical_field in mapping["fields"].items():
@@ -77,7 +113,6 @@ def process_clinical_records(
                     )
 
                 if canonical_field in normalized:
-
                     new_value = normalized[canonical_field]
 
                     if original_value != new_value:
@@ -115,10 +150,12 @@ def process_clinical_records(
             clinical_record = model(**payload)
 
             patient = patient_index[patient_id]
-
             collection = getattr(patient, record_type)
 
-            if any(item.id == clinical_record.id for item in collection):
+            if any(
+                item.id == clinical_record.id
+                for item in collection
+            ):
                 raise ValueError(
                     f"Duplicate record ID: {clinical_record.id}"
                 )
@@ -126,7 +163,6 @@ def process_clinical_records(
             collection.append(clinical_record)
 
         except Exception as error:
-
             errors.append(str(error))
 
         source_records.append(

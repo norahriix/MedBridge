@@ -1,3 +1,4 @@
+
 sources:
   - name: hospital_a
     patients: data/hospital_a/patients.json
@@ -14,6 +15,21 @@ sources:
 
     diagnoses: data/hospital_a/diagnoses.json
     diagnosis_mapping: mappings/hospital_a/diagnoses.yaml
+
+    procedures: data/hospital_a/procedures.json
+    procedure_mapping: mappings/hospital_a/procedures.yaml
+
+    medical_history: data/hospital_a/medical_history.json
+    medical_history_mapping: mappings/hospital_a/medical_history.yaml
+
+    encounters: data/hospital_a/encounters.json
+    encounter_mapping: mappings/hospital_a/encounters.yaml
+
+    immunizations: data/hospital_a/immunizations.json
+    immunization_mapping: mappings/hospital_a/immunizations.yaml
+
+    family_history: data/hospital_a/family_history.json
+    family_history_mapping: mappings/hospital_a/family_history.yaml
 
   - name: hospital_b
     patients: data/hospital_b/patients.json

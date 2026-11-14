@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from uuid import uuid4, uuid5, NAMESPACE_URL
 import yaml
@@ -21,6 +22,8 @@ from provenance.tracker import track_provenance
 from conflicts.detector import detect_conflicts
 from conflicts.clinical_detector import detect_clinical_conflicts
 from resolution.rules import resolve_conflict
+
+from fhir.connector import fetch_fhir_data
 
 from fhir.converter import (
     patient_to_fhir,
@@ -320,6 +323,29 @@ def collect_source_records():
                     clinical_records
                 )
 
+    # Connect to the synthetic Mock Hospital FHIR server
+    try:
+
+        mock_patients, mock_records = fetch_fhir_data()
+
+        all_patients.extend(mock_patients)
+        all_source_records.extend(mock_records)
+
+    except Exception as error:
+
+        all_source_records.append(
+            SourceRecord(
+                source="mock_hospital_fhir",
+                original={},
+                mapped={},
+                normalized={},
+                provenance=[],
+                errors=[
+                    f"FHIR connection failed: {error}"
+                ]
+            )
+        )
+
     return all_patients, all_source_records
 
 
@@ -328,9 +354,15 @@ def run_identity_matching():
 
     patients, source_records = collect_source_records()
 
-    matches = match_patients(patients)
+    # Do not match synthetic Mock Hospital patients
+    matches = match_patients([
+        patient
+        for patient in patients
+        if "mock_hospital_fhir" not in patient.sources
+    ])
 
     return patients, matches
+
 
 # 8. Conflict Detection and Resolution
 def process_conflicts(patients: list[Patient]):
@@ -388,6 +420,7 @@ def process_conflicts(patients: list[Patient]):
         resolutions.append(resolution)
 
     return conflicts, resolutions
+
 
 # 9. FHIR Export
 def export_fhir(patients: list[Patient], conflicts):
@@ -486,7 +519,12 @@ def run_pipeline() -> PipelineResult:
 
         patients, source_records = collect_source_records()
 
-        matches = match_patients(patients)
+        # Do not match synthetic Mock Hospital patients
+        matches = match_patients([
+            patient
+            for patient in patients
+            if "mock_hospital_fhir" not in patient.sources
+        ])
 
         conflicts, resolutions = process_conflicts(
             patients

@@ -1,0 +1,25 @@
+
+[
+    {
+        "encounter_id": "ENC001",
+        "patient_id": "A100",
+        "encounter_type": "Emergency",
+        "encounter_date": "2023-04-12",
+        "reason": "Severe abdominal pain",
+        "diagnosis": "Acute appendicitis",
+        "location": "Emergency Department",
+        "encounter_status": "completed",
+        "notes": "Patient was admitted for surgery"
+    },
+    {
+        "encounter_id": "ENC002",
+        "patient_id": "A100",
+        "encounter_type": "Outpatient",
+        "encounter_date": "2024-01-20",
+        "reason": "Diabetes follow-up",
+        "diagnosis": "Type 2 Diabetes Mellitus",
+        "location": "Internal Medicine Clinic",
+        "encounter_status": "completed",
+        "notes": "Routine follow-up visit"
+    }
+]

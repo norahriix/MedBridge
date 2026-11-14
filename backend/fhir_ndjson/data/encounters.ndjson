@@ -1,0 +1,1 @@
+{"resourceType": "Encounter", "id": "NDJSON-E001", "subject": {"reference": "Patient/NDJSON-P001"}, "status": "finished", "class": {"code": "AMB"}, "period": {"start": "2026-11-14"}}

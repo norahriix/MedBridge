@@ -1,0 +1,2 @@
+visit_occurrence_id,person_id,visit_source_value,visit_start_date
+OMOP-E001,OMOP-P001,Outpatient,2026-11-14

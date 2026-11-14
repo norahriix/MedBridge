@@ -1,0 +1,1 @@
+{"resourceType": "Condition", "id": "NDJSON-C001", "subject": {"reference": "Patient/NDJSON-P001"}, "code": {"text": "Hypertension"}, "onsetDateTime": "2020-01-10"}

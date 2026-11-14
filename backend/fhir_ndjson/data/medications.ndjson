@@ -1,0 +1,1 @@
+{"resourceType": "MedicationStatement", "id": "NDJSON-M001", "subject": {"reference": "Patient/NDJSON-P001"}, "status": "active", "medicationCodeableConcept": {"text": "Sample Medication"}, "dosage": [{"text": "10 mg daily"}]}

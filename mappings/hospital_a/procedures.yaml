@@ -1,0 +1,10 @@
+
+fields:
+  procedure_id: id
+  patient_id: source_patient_id
+  procedure_name: name
+  procedure_type: procedure_type
+  procedure_date: date
+  procedure_status: status
+  outcome: outcome
+  notes: notes

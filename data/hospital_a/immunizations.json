@@ -1,0 +1,19 @@
+
+[
+    {
+        "immunization_id": "IMM001",
+        "patient_id": "A100",
+        "vaccine_name": "Influenza Vaccine",
+        "vaccination_date": "2024-10-15",
+        "dose": "0.5 ml",
+        "vaccination_status": "completed"
+    },
+    {
+        "immunization_id": "IMM002",
+        "patient_id": "A100",
+        "vaccine_name": "COVID-19 Vaccine",
+        "vaccination_date": "2023-09-20",
+        "dose": "Booster",
+        "vaccination_status": "completed"
+    }
+]

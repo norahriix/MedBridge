@@ -1,0 +1,163 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "DSTU2-P001",
+        "name": [
+          {
+            "family": "TEST",
+            "given": [
+              "PATIENT"
+            ]
+          }
+        ],
+        "birthDate": "1990-01-01",
+        "gender": "male"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "DSTU2-OBS001",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "GLU",
+              "display": "Glucose"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "effectiveDateTime": "2026-11-14",
+        "valueQuantity": {
+          "value": 110,
+          "unit": "mg/dL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "DSTU2-MED001",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "display": "Metformin"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "dosage": [
+          {
+            "text": "500 mg"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "DSTU2-ALL001",
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "substance": {
+          "coding": [
+            {
+              "display": "Penicillin"
+            }
+          ]
+        },
+        "status": "confirmed",
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "text": "Rash"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "DSTU2-DX001",
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "E11.9",
+              "display": "Diabetes mellitus"
+            }
+          ]
+        },
+        "onsetDate": "2026-01-01"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "DSTU2-ENC001",
+        "status": "finished",
+        "class": {
+          "code": "outpatient"
+        },
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "period": {
+          "start": "2026-11-14"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "DSTU2-PR001",
+        "status": "completed",
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "code": {
+          "coding": [
+            {
+              "display": "Blood test"
+            }
+          ]
+        },
+        "performedDateTime": "2026-11-14"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "DSTU2-IMM001",
+        "status": "completed",
+        "patient": {
+          "reference": "Patient/DSTU2-P001"
+        },
+        "vaccineCode": {
+          "coding": [
+            {
+              "display": "Influenza vaccine"
+            }
+          ]
+        },
+        "date": "2026-11-14"
+      }
+    }
+  ]
+}

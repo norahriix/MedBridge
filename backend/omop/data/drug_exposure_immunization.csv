@@ -1,0 +1,2 @@
+drug_exposure_id,person_id,drug_source_value,drug_exposure_start_date,quantity
+OMOP-I001,OMOP-P001,Sample Vaccine,2026-11-14,1 dose

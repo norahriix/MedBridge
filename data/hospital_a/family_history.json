@@ -1,0 +1,17 @@
+
+[
+    {
+        "family_history_id": "FAM001",
+        "patient_id": "A100",
+        "family_condition": "Type 2 Diabetes Mellitus",
+        "relationship": "Father",
+        "notes": "Diagnosed at age 50"
+    },
+    {
+        "family_history_id": "FAM002",
+        "patient_id": "A100",
+        "family_condition": "Hypertension",
+        "relationship": "Mother",
+        "notes": "Long-term condition"
+    }
+]

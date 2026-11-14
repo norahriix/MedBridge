@@ -1,0 +1,1 @@
+{"resourceType": "Observation", "id": "NDJSON-O001", "subject": {"reference": "Patient/NDJSON-P001"}, "status": "final", "code": {"text": "Heart Rate"}, "valueQuantity": {"value": 75, "unit": "bpm"}, "effectiveDateTime": "2026-11-14"}

@@ -4,3 +4,4 @@ fields:
   patient_name: name
   dob: birth_date
   sex: gender
+  national_id: national_id

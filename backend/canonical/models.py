@@ -1,4 +1,5 @@
-from datetime import date, datetime
+
+from datetime import date as Date
 from typing import Literal
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -19,7 +20,7 @@ class Observation(MedBridgeModel):
     type: str
     value: float
     unit: str
-    date: date
+    date: Date
     source: str
     provenance: list[Provenance] = Field(default_factory=list)
 
@@ -50,16 +51,86 @@ class Diagnosis(MedBridgeModel):
     provenance: list[Provenance] = Field(default_factory=list)
 
 
+# العمليات الجراحية والإجراءات الطبية
+class Procedure(MedBridgeModel):
+    id: str
+    name: str
+    procedure_type: str | None = None
+    date: Date | None = None
+    status: str = "unknown"
+    outcome: str | None = None
+    notes: str | None = None
+    source: str
+    provenance: list[Provenance] = Field(default_factory=list)
+
+
+# التاريخ المرضي السابق والحالات المزمنة
+class MedicalHistory(MedBridgeModel):
+    id: str
+    condition: str
+    code: str | None = None
+    onset_date: Date | None = None
+    resolved_date: Date | None = None
+    status: str = "unknown"
+    notes: str | None = None
+    source: str
+    provenance: list[Provenance] = Field(default_factory=list)
+
+
+# الزيارات الطبية والتنويم
+class Encounter(MedBridgeModel):
+    id: str
+    encounter_type: str
+    date: Date | None = None
+    reason: str | None = None
+    diagnosis: str | None = None
+    location: str | None = None
+    status: str = "unknown"
+    notes: str | None = None
+    source: str
+    provenance: list[Provenance] = Field(default_factory=list)
+
+
+# التطعيمات
+class Immunization(MedBridgeModel):
+    id: str
+    vaccine: str
+    date: Date | None = None
+    dose: str | None = None
+    status: str = "unknown"
+    source: str
+    provenance: list[Provenance] = Field(default_factory=list)
+
+
+# التاريخ العائلي المرضي
+class FamilyHistory(MedBridgeModel):
+    id: str
+    condition: str
+    relationship: str | None = None
+    notes: str | None = None
+    source: str
+    provenance: list[Provenance] = Field(default_factory=list)
+
+
 class Patient(MedBridgeModel):
     id: str
+    national_id: str | None = None
     name: str | None = None
-    birth_date: date | None = None
+    birth_date: Date | None = None
     gender: Literal["male", "female", "unknown"] = "unknown"
+
     sources: list[str] = Field(default_factory=list)
+
     observations: list[Observation] = Field(default_factory=list)
     medications: list[Medication] = Field(default_factory=list)
     allergies: list[Allergy] = Field(default_factory=list)
     diagnoses: list[Diagnosis] = Field(default_factory=list)
+
+    procedures: list[Procedure] = Field(default_factory=list)
+    medical_history: list[MedicalHistory] = Field(default_factory=list)
+    encounters: list[Encounter] = Field(default_factory=list)
+    immunizations: list[Immunization] = Field(default_factory=list)
+    family_history: list[FamilyHistory] = Field(default_factory=list)
 
 
 class IdentityMatch(MedBridgeModel):
@@ -72,6 +143,7 @@ class IdentityMatch(MedBridgeModel):
 class Conflict(MedBridgeModel):
     id: str
     patient_id: str
+    patient_name: str = ""
     field: str
     conflict_type: str
     record_ids: list[str]

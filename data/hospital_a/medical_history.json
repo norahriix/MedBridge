@@ -1,0 +1,23 @@
+
+[
+    {
+        "history_id": "HIST001",
+        "patient_id": "A100",
+        "condition": "Type 2 Diabetes Mellitus",
+        "condition_code": "E11.9",
+        "onset_date": "2018-05-20",
+        "resolved_date": null,
+        "condition_status": "active",
+        "notes": "Long-term chronic condition"
+    },
+    {
+        "history_id": "HIST002",
+        "patient_id": "A100",
+        "condition": "Iron Deficiency Anemia",
+        "condition_code": "D50.9",
+        "onset_date": "2021-02-10",
+        "resolved_date": "2021-08-15",
+        "condition_status": "resolved",
+        "notes": "Previously treated"
+    }
+]

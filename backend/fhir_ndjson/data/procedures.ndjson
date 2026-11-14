@@ -1,0 +1,1 @@
+{"resourceType": "Procedure", "id": "NDJSON-PR001", "subject": {"reference": "Patient/NDJSON-P001"}, "status": "completed", "code": {"text": "Sample Procedure"}, "performedDateTime": "2026-11-14"}

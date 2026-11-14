@@ -1,0 +1,10 @@
+
+fields:
+  history_id: id
+  patient_id: source_patient_id
+  condition: condition
+  condition_code: code
+  onset_date: onset_date
+  resolved_date: resolved_date
+  condition_status: status
+  notes: notes

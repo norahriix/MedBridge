@@ -1,157 +1,1938 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MedBridge</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 24px;
-      min-height: 100vh;
-      box-sizing: border-box;
-      display: grid;
-      place-items: center;
-      background: #eef5f4;
-      color: #183832;
-      font-family: system-ui, sans-serif;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedBridge | منصة تكامل البيانات الطبية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+ --navy:#102c43;--navy2:#183e57;--teal:#18a999;--teal2:#40c7b5;
+ --bg:#f3f6f8;--white:#fff;--text:#203747;--muted:#82919c;
+ --line:#e8edf0;--green:#19a77c;--orange:#e6a23c;--red:#d95c65;
+ --shadow:0 8px 28px rgba(25,50,68,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.sidebar{
+ position:fixed;right:0;top:0;bottom:0;width:258px;
+ background:linear-gradient(180deg,#102c43,#14394f);
+ color:#fff;padding:25px 16px;z-index:20;display:flex;flex-direction:column;
+}
+.brand{display:flex;align-items:center;gap:12px;padding:0 9px 28px}
+.brand-mark{
+ width:43px;height:43px;border-radius:13px;
+ background:linear-gradient(145deg,#2bc5b1,#128c91);
+ display:grid;place-items:center;box-shadow:0 7px 20px #0a9d9270;
+}
+.brand-mark svg{width:27px;height:27px}
+.brand-name{font-size:20px;font-weight:700}
+.brand-sub{font-size:10px;color:#a7c2ce;margin-top:1px}
+.nav-label{font-size:10px;color:#7894a4;padding:13px 12px 9px}
+.nav-btn{
+ width:100%;border:0;background:transparent;color:#b9cbd4;
+ padding:12px 13px;border-radius:11px;text-align:right;
+ display:flex;align-items:center;gap:12px;margin:3px 0;
+ transition:.2s;font-size:13px;
+}
+.nav-btn svg{width:19px;height:19px;opacity:.85;flex-shrink:0}
+.nav-btn:hover,.nav-btn.active{background:#ffffff16;color:#fff}
+.nav-btn.active{box-shadow:inset -3px 0 #32c5b3}
+.sidebar-bottom{margin-top:auto}
+.connection{padding:14px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff09;margin:12px 4px 17px}
+.connection-head{display:flex;align-items:center;gap:8px;font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#40d5a8;box-shadow:0 0 0 4px #40d5a81c}
+.connection small{display:block;color:#9bb1bd;margin-top:7px;font-size:10px}
+.user-mini{display:flex;align-items:center;gap:10px;padding:12px 8px;border-top:1px solid #ffffff18}
+.avatar{width:34px;height:34px;border-radius:11px;background:#2a586c;display:grid;place-items:center;font-weight:700}
+.user-mini strong{display:block;font-size:12px}
+.user-mini small{font-size:10px;color:#9bb1bd}
+.main{margin-right:258px;min-height:100vh}
+.topbar{
+ height:76px;background:#fff;border-bottom:1px solid var(--line);
+ display:flex;align-items:center;justify-content:space-between;
+ padding:0 34px;position:sticky;top:0;z-index:10;
+}
+.breadcrumb{font-size:12px;color:var(--muted)}
+.breadcrumb strong{color:var(--text);font-weight:600}
+.top-actions{display:flex;align-items:center;gap:12px}
+.icon-btn{
+ width:38px;height:38px;border:1px solid var(--line);
+ border-radius:11px;background:#fff;color:#617582;display:grid;place-items:center;
+}
+.icon-btn svg{width:18px;height:18px}
+.content{padding:27px 34px 45px;max-width:1600px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+.page-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px}
+.page-heading h1{font-size:22px;margin:0 0 5px;font-weight:700;color:#18374b}
+.page-heading p{font-size:12px;color:var(--muted);margin:0;line-height:1.8}
+.btn{
+ border:0;border-radius:10px;padding:10px 17px;font-size:12px;
+ font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s;
+}
+.btn-primary{background:var(--teal);color:white;box-shadow:0 5px 14px #18a99930}
+.btn-primary:hover{background:#128e83;transform:translateY(-1px)}
+.btn-light{background:#edf4f5;color:#3e6870}
+.btn-outline{background:#fff;border:1px solid var(--line);color:#506674}
+.btn-danger{background:#fff0f0;color:#c54d58}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn svg{width:16px;height:16px}
+.hero{
+ min-height:240px;border-radius:20px;overflow:hidden;position:relative;
+ background:linear-gradient(110deg,#102d45 0%,#174a5a 57%,#126c70 100%);
+ display:flex;align-items:center;padding:34px 38px;color:#fff;
+ box-shadow:0 13px 32px #173b4c20;
+}
+.hero:before,.hero:after{
+ content:"";position:absolute;border-radius:50%;border:1px solid #ffffff12;
+}
+.hero:before{width:460px;height:460px;left:10%;top:-260px}
+.hero:after{width:350px;height:350px;left:18%;top:-200px}
+.hero-copy{position:relative;z-index:2;max-width:58%}
+.hero-kicker{font-size:11px;color:#8ce0d3;margin-bottom:12px}
+.hero h2{font-size:25px;line-height:1.65;margin:0 0 8px;font-weight:700}
+.hero p{font-size:12px;color:#d0e0e4;line-height:2;margin:0 0 19px}
+.hero .btn{background:#2bc0ad;color:#073b42}
+.hero-buildings-photo{
+ position:absolute;inset:0;z-index:0;pointer-events:none;
+ background-image:linear-gradient(90deg,rgba(16,45,69,.95),rgba(16,45,69,.55) 55%,rgba(16,45,69,.12)),
+ url("https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=2000&q=85");
+ background-size:cover;background-position:center 55%;opacity:.55;
+}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:21px 0}
+.stat-card,.panel,.table-card{background:#fff;border:1px solid #edf0f2;border-radius:15px;box-shadow:var(--shadow)}
+.stat-card{padding:18px 19px;min-height:112px}
+.stat-top{display:flex;align-items:center;justify-content:space-between}
+.stat-label{font-size:11px;color:var(--muted)}
+.stat-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center}
+.stat-icon svg{width:18px;height:18px}
+.stat-number{font-size:25px;font-weight:700;color:#19394b;margin-top:9px}
+.stat-foot{font-size:10px;color:#8b9ba4;margin-top:2px}
+.green{color:var(--green)!important}.orange{color:var(--orange)!important}.red{color:var(--red)!important}
+.icon-teal{background:#e7f7f4;color:#159c8d}.icon-blue{background:#edf3fa;color:#4d7eb5}
+.icon-orange{background:#fff5e8;color:#d99a35}.icon-red{background:#fff0f1;color:#d46670}
+.dashboard-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:17px}
+.panel{padding:20px;margin-bottom:17px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;gap:10px}
+.panel-head h3{font-size:14px;margin:0;color:#254356}
+.panel-head span{font-size:10px;color:var(--muted)}
+.activity{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f3f4}
+.activity:last-child{border:0;padding-bottom:0}
+.activity-icon{width:36px;height:36px;border-radius:11px;background:#edf7f5;color:#189d8d;display:grid;place-items:center}
+.activity-info{flex:1}.activity-info strong{font-size:11px;display:block;font-weight:600}
+.activity-info small{font-size:10px;color:var(--muted)}
+.activity-time{font-size:10px;color:#9aa7ae}
+.chart-wrap{height:185px;position:relative}
+.chart-wrap svg{width:100%;height:100%;overflow:visible}
+.chart-labels{display:flex;justify-content:space-between;font-size:9px;color:#9aa7ae;margin-top:6px}
+.legend{display:flex;gap:15px;font-size:10px;color:#84939c}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:5px}
+.table-card{overflow:hidden}
+.table-toolbar{padding:16px 19px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
+.search-box{position:relative}
+.search-box input{width:230px;padding:9px 34px 9px 11px;border:1px solid var(--line);border-radius:9px;outline:none;font-size:11px;background:#fbfcfd}
+.search-box svg{position:absolute;right:10px;top:9px;width:15px;color:#93a1a9}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{font-size:10px;color:#82929c;background:#fafcfc;font-weight:600;text-align:right;padding:13px 17px}
+td{font-size:11px;padding:14px 17px;border-top:1px solid #f0f3f4;color:#435966}
+tbody tr:hover{background:#fbfdfd}
+.status{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 9px;font-size:9px;font-weight:600}
+.status:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.ok{background:#e9f8f1;color:#16966c}.status.pending{background:#fff5e7;color:#c88a2c}
+.status.off{background:#f0f2f4;color:#87949c}.status.error{background:#fff0f0;color:#cf5860}
+.action-link{border:0;background:transparent;color:#159b8d;font-size:10px;font-weight:600}
+.action-link:hover{text-decoration:underline}
+.hospital-name-link{border:0;background:transparent;color:#1b5363;font-size:11px;font-weight:700;padding:0;text-align:right}
+.hospital-name-link:hover{color:var(--teal);text-decoration:underline}
+.empty{padding:35px;text-align:center;color:#93a0a8;font-size:12px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:11px;color:#536b78;font-weight:600}
+.field input,.field select,.field textarea{
+ width:100%;border:1px solid #e3e9ec;border-radius:9px;padding:11px;
+ outline:none;background:#fff;font-size:12px;color:#294454;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#46bcae;box-shadow:0 0 0 3px #18a99912}
+.field textarea{min-height:90px;resize:vertical}
+.form-actions{display:flex;gap:9px;margin-top:19px;flex-wrap:wrap}
+.modal-backdrop{position:fixed;inset:0;background:#102b3c88;z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal{background:#fff;width:min(560px,100%);border-radius:17px;padding:23px;box-shadow:0 20px 70px #071b2c40;max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h3{margin:0;font-size:16px}
+.close-modal{border:0;background:#f1f4f5;border-radius:8px;width:31px;height:31px;font-size:19px;color:#60737d}
+.notice{padding:12px 14px;border-radius:10px;background:#eef8f7;color:#39766f;font-size:11px;line-height:1.9;margin-bottom:15px}
+.notice.warning{background:#fff7e9;color:#9a6c22}
+.login-screen{position:fixed;inset:0;z-index:100;background:#f1f5f6;display:none;align-items:center;justify-content:center;padding:20px}
+.login-screen.show{display:flex}
+.login-card{width:min(420px,100%);background:white;border-radius:20px;padding:34px;box-shadow:var(--shadow)}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-brand strong{font-size:22px;color:var(--navy)}
+.login-card h2{font-size:20px;margin:0 0 7px}
+.login-card p{font-size:11px;color:var(--muted);margin:0 0 23px}
+.login-card .field{margin-bottom:14px}
+.login-card .btn{width:100%;margin-top:8px}
+.toast{position:fixed;bottom:24px;left:24px;z-index:120;background:#173c4e;color:white;padding:13px 18px;border-radius:11px;box-shadow:0 8px 25px #102b3c30;font-size:11px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s;max-width:min(440px,90vw)}
+.toast.show{opacity:1;transform:translateY(0)}
+.mobile-menu{display:none}
+.section-note{font-size:11px;color:#8b9ba4;margin:0 0 15px;line-height:1.9}
+.integration-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.step-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:#fcfdfd}
+.step-num{width:27px;height:27px;border-radius:8px;background:#e8f7f4;color:#159b8d;display:grid;place-items:center;font-size:11px;font-weight:700;margin-bottom:10px}
+.step-card strong{font-size:11px;display:block;margin-bottom:5px}
+.step-card p{font-size:10px;color:var(--muted);line-height:1.8;margin:0}
+.details-header{display:flex;align-items:center;gap:13px;margin-bottom:20px;flex-wrap:wrap}
+.details-symbol{width:52px;height:52px;border-radius:15px;background:#e7f7f4;color:#159b8d;display:grid;place-items:center;flex-shrink:0}
+.details-symbol svg{width:27px;height:27px}
+.details-title{flex:1;min-width:180px}
+.details-title h2{font-size:19px;margin:0 0 4px;color:#18374b}
+.details-title p{font-size:11px;color:var(--muted);margin:0}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.info-item{padding:13px;border:1px solid #edf0f2;border-radius:11px;background:#fcfdfd}
+.info-item small{display:block;color:#8b9ba4;font-size:10px;margin-bottom:5px}
+.info-item strong{font-size:12px;color:#294454;word-break:break-word}
+
+.file-drop{
+ border:1.5px dashed #b9d7d2;
+ border-radius:14px;
+ padding:28px 20px;
+ min-height:155px;
+ width:100%;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ background:#f8fcfb;
+ cursor:pointer;
+ transition:.2s;
+ overflow:visible;
+}
+.file-drop:hover{
+ border-color:var(--teal);
+ background:#f0faf8;
+}
+.file-drop strong{
+ display:block;
+ font-size:12px;
+ color:#315d61;
+ margin:9px 0 5px;
+ max-width:100%;
+ overflow-wrap:anywhere;
+}
+.file-drop small{
+ font-size:10px;
+ color:#8b9ba4;
+}
+.file-drop input{display:none}
+.file-icon{
+ width:42px;
+ height:42px;
+ min-width:42px;
+ min-height:42px;
+ border-radius:13px;
+ background:#e5f6f2;
+ color:#159b8d;
+ display:grid;
+ place-items:center;
+ margin:0 auto;
+ font-size:21px;
+ flex-shrink:0;
+}
+.selected-file-card{
+ display:none;
+ width:100%;
+ min-height:76px;
+ margin-top:12px;
+ padding:14px 16px;
+ border:1px solid #cce9df;
+ border-radius:12px;
+ background:#effaf5;
+ align-items:center;
+ gap:12px;
+ overflow:visible;
+}
+.selected-file-card.show{display:flex}
+.selected-file-icon{
+ width:39px;
+ height:39px;
+ min-width:39px;
+ border-radius:11px;
+ background:#d9f2e8;
+ color:#168c69;
+ display:grid;
+ place-items:center;
+ font-size:19px;
+}
+.selected-file-info{
+ flex:1;
+ min-width:0;
+}
+.selected-file-info strong{
+ display:block;
+ color:#28634f;
+ font-size:11px;
+ overflow-wrap:anywhere;
+ line-height:1.8;
+}
+.selected-file-info small{
+ display:block;
+ color:#77968a;
+ font-size:10px;
+ margin-top:4px;
+}
+@media(max-width:720px){
+ .file-drop{padding:24px 14px}
+ .selected-file-card{padding:12px}
+}
+
+.file-icon{width:39px;height:39px;border-radius:12px;background:#e5f6f2;color:#159b8d;display:grid;place-items:center;margin:auto;font-size:20px}
+.mapping-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f0f3f4}
+.mapping-row:last-child{border:0}
+.mapping-row label{font-size:11px;color:#536b78;font-weight:600}
+.mapping-row select{width:100%;padding:9px;border:1px solid #e3e9ec;border-radius:8px;background:#fff;font-size:11px;color:#294454}
+.result-box{background:#f7f9fa;border:1px solid #edf0f2;border-radius:10px;padding:14px;font-size:11px;line-height:1.9;color:#45616e;white-space:pre-wrap;direction:ltr;text-align:left;overflow:auto;max-height:260px}
+.detail-section-title{font-size:13px;color:#254356;margin:0 0 14px}
+.step-status{display:flex;align-items:center;gap:8px;font-size:11px;color:#607782;padding:9px 0}
+.step-status .bullet{width:8px;height:8px;border-radius:50%;background:#c6d1d5}
+.step-status.done .bullet{background:var(--green)}
+@media(max-width:1100px){
+ .sidebar{width:220px}.main{margin-right:220px}
+ .stats{grid-template-columns:repeat(2,1fr)}.dashboard-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+ .sidebar{transform:translateX(100%);transition:.25s;width:260px}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-right:0}.topbar{padding:0 17px;height:65px}
+ .content{padding:20px 15px}.mobile-menu{display:grid}
+ .hero{padding:25px 22px;min-height:260px}.hero-copy{max-width:100%}
+ .hero h2{font-size:20px}.stats{gap:10px}
+ .stat-card{padding:14px}.stat-number{font-size:22px}
+ .page-heading{align-items:flex-start}.page-heading h1{font-size:19px}
+ .form-grid,.details-grid{grid-template-columns:1fr}
+ .integration-steps{grid-template-columns:1fr}
+ .search-box input{width:180px}
+ .mapping-row{grid-template-columns:1fr;gap:6px}
+}
+.conflict-review-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(15, 35, 45, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.conflict-review-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.2);
+    color: #243b43;
+}
+
+.conflict-review-muted {
+    color: #71858b;
+    font-size: 13px;
+}
+
+.conflict-value-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    margin: 10px 0;
+    border: 1px solid #dce8e4;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #f9fbfa;
+}
+
+.conflict-value-option span {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-wrap: anywhere;
+}
+
+.conflict-review-reason {
+    width: 100%;
+    min-height: 100px;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid #dce5e2;
+    border-radius: 9px;
+    resize: vertical;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.conflict-review-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.conflict-review-actions button,
+.conflict-review-cancel {
+    padding: 11px 17px;
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.conflict-review-btn {
+    background: #087f70;
+    color: white;
+}
+
+.conflict-review-reject {
+    background: #fae9e9;
+    color: #a83232;
+}
+
+.conflict-review-cancel {
+    background: #edf2f0;
+    color: #354b4c;
+}
+
+.medical-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(15, 35, 45, .68);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.medical-panel {
+    background: #fff;
+    width: 100%;
+    max-width: 900px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 26px;
+    border-radius: 18px;
+    color: #243b43;
+    box-shadow: 0 15px 50px rgba(0,0,0,.2);
+}
+
+.medical-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e6eeeb;
+}
+
+.medical-header h2 {
+    margin: 7px 0;
+    font-size: 23px;
+}
+
+.medical-header p,
+.medical-kicker {
+    color: #71858b;
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+.medical-kicker {
+    color: #087f70;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.medical-close {
+    border: 0;
+    background: #edf2f0;
+    color: #354b4c;
+    padding: 11px 17px;
+    border-radius: 9px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.medical-section {
+    margin-top: 23px;
+}
+
+.medical-section h3 {
+    font-size: 16px;
+    color: #087f70;
+    margin: 0 0 13px;
+}
+
+.medical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.medical-card {
+    background: #f7faf9;
+    border: 1px solid #e3ece8;
+    border-radius: 12px;
+    padding: 15px;
+    min-width: 0;
+}
+
+.medical-card h4 {
+    margin: 0 0 13px;
+    font-size: 15px;
+    color: #087f70;
+}
+
+.medical-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid #e9efec;
+    font-size: 13px;
+}
+
+.medical-row span {
+    color: #71858b;
+}
+
+.medical-row strong {
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.medical-empty {
+    color: #89999a;
+    font-size: 13px;
+    background: #f7faf9;
+    padding: 14px;
+    border-radius: 10px;
+}
+
+.medical-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.medical-sources span {
+    background: #e8f5f1;
+    color: #087f70;
+    padding: 9px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.medical-footer {
+    border-top: 1px solid #e6eeeb;
+    margin-top: 25px;
+    padding-top: 15px;
+    color: #89999a;
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .medical-panel {
+        padding: 17px;
     }
-    main {
-      width: min(100%, 760px);
-      box-sizing: border-box;
-      padding: 32px;
-      background: white;
-      border: 1px solid #d6e6e2;
-      border-radius: 16px;
+
+    .medical-header h2 {
+        font-size: 19px;
     }
-    h1 { margin: 0; }
-    p { color: #48665f; }
-    button {
-      padding: 12px 20px;
-      border: 0;
-      border-radius: 8px;
-      background: #08675b;
-      color: white;
-      font: inherit;
-    }
-    button:enabled { cursor: pointer; }
-    button:disabled { opacity: .65; }
-    #pipeline-status { margin-bottom: 0; }
-    #patient-results { margin-top: 24px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: start; }
-    caption { text-align: start; font-weight: 700; margin-bottom: 12px; }
-    th, td { padding: 10px; text-align: start; border-bottom: 1px solid #d6e6e2; }
-    th { background: #eef5f4; }
-    td:nth-child(2) { white-space: nowrap; }
-    #run-summary:not([hidden]) {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-      gap: 12px;
-      margin: 20px 0 0;
-    }
-    #run-summary div {
-      padding: 12px;
-      background: #eef5f4;
-      border-radius: 8px;
-    }
-    #run-summary dd { margin: 4px 0 0; font-size: 1.35rem; font-weight: 700; }
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      main { padding: 20px; }
-    }
-  </style>
+}
+
+</style>
 </head>
+
 <body>
-  <main>
-    <h1>MedBridge</h1>
-    <p>شغّلي معالجة بيانات المستشفيات لعرض النتائج.</p>
-    <button id="run-pipeline" type="button">تشغيل المعالجة</button>
-    <p id="pipeline-status" role="status" hidden></p>
-    <dl id="run-summary" hidden>
-      <div><dt>المطابقات</dt><dd id="match-count"></dd></div>
-      <div><dt>التعارضات</dt><dd id="conflict-count"></dd></div>
-      <div><dt>موارد FHIR</dt><dd id="fhir-count"></dd></div>
-    </dl>
-    <div id="patient-results" hidden>
-      <table>
-        <caption>نتائج المرضى</caption>
-        <thead>
-          <tr>
-            <th scope="col">الاسم</th>
-            <th scope="col">تاريخ الميلاد</th>
-            <th scope="col">المستشفى</th>
-          </tr>
-        </thead>
-        <tbody id="patient-rows"></tbody>
-      </table>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+ <div class="brand">
+  <div class="brand-mark">
+   <svg viewBox="0 0 40 40" fill="none"><path d="M5 30H35M8 30V18L20 8L32 18V30M13 30V20H27V30M17 20V30M23 20V30" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div><div class="brand-name">MedBridge</div><div class="brand-sub">MEDICAL DATA INTEGRATION</div></div>
+ </div>
+
+ <div class="nav-label">القائمة الرئيسية</div>
+ <button class="nav-btn active" data-page="dashboard">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="11" width="7" height="10" rx="2"/><rect x="3" y="14" width="8" height="7" rx="2"/></svg>لوحة التحكم
+ </button>
+ <button class="nav-btn" data-page="hospitals">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg>المستشفيات والأنظمة
+ </button>
+ <button class="nav-btn" data-page="patients">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M19 8v6M22 11h-6"/></svg>سجل المرضى
+ </button>
+ <button class="nav-btn" data-page="conflicts">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg>مراجعة التعارضات
+ </button>
+ <div class="nav-label">إدارة البيانات</div>
+ <button class="nav-btn" data-page="pipeline">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16M7 12h10M10 19h4"/><path d="M4 5v4M20 5v4M7 12v4M17 12v4"/></svg>معالجة البيانات
+ </button>
+ <button class="nav-btn" data-page="reports">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>التقارير والإحصائيات
+ </button>
+
+ <div class="sidebar-bottom">
+  <div class="connection"><div class="connection-head"><span class="dot"></span> النظام جاهز للعمل</div><small id="connectionText">بانتظار تحديث حالة الاتصال</small></div>
+  <div class="user-mini"><div class="avatar">M</div><div><strong>مسؤول النظام</strong><small>مدير المنصة</small></div></div>
+ </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+ <div style="display:flex;align-items:center;gap:12px">
+  <button class="icon-btn mobile-menu" id="menuBtn" aria-label="القائمة">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="breadcrumb">MedBridge <span style="margin:0 7px;color:#c5cdd1">/</span> <strong id="crumb">لوحة التحكم</strong></div>
+ </div>
+ <div class="top-actions">
+  <button class="icon-btn" id="refreshBtn" title="تحديث">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.8-2L20 12M4 12l2.6 5a7 7 0 0 0 11.8-2"/></svg>
+  </button>
+  <button class="icon-btn" id="logoutBtn" title="تسجيل الخروج">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
+  </button>
+ </div>
+</header>
+
+<div class="content">
+
+<section class="page active" id="page-dashboard">
+ <div class="hero">
+  <div class="hero-buildings-photo" aria-hidden="true"></div>
+  <div class="hero-copy">
+   <div class="hero-kicker">منصة تكامل البيانات الصحية</div>
+   <h2>بيانات صحية مترابطة،<br>ورعاية أكثر تكاملًا</h2>
+   <p>منصة MedBridge لتوحيد بيانات المرضى القادمة من الأنظمة الصحية المختلفة، وتحسين جودة البيانات ودعم تبادل المعلومات.</p>
+   <button class="btn" onclick="navigate('hospitals')">إدارة المستشفيات ←</button>
+  </div>
+ </div>
+
+ <div class="stats">
+  <div class="stat-card"><div class="stat-top"><span class="stat-label">المستشفيات المسجلة</span><span class="stat-icon icon-teal">⌂</span></div><div class="stat-number" id="statHospitals">0</div><div class="stat-foot">إجمالي الجهات المسجلة</div></div>
+  <div class="stat-card"><div class="stat-top"><span class="stat-label">سجلات المرضى</span><span class="stat-icon icon-blue">♙</span></div><div class="stat-number" id="statPatients">0</div><div class="stat-foot">السجلات المعالجة أو المستوردة</div></div>
+  <div class="stat-card"><div class="stat-top"><span class="stat-label">المطابقات الناجحة</span><span class="stat-icon icon-orange">✓</span></div><div class="stat-number" id="statMatches">0</div><div class="stat-foot">نتائج المطابقة المسجلة</div></div>
+  <div class="stat-card"><div class="stat-top"><span class="stat-label">التعارضات</span><span class="stat-icon icon-red">!</span></div><div class="stat-number" id="statConflicts">0</div><div class="stat-foot">تحتاج إلى مراجعة</div></div>
+ </div>
+
+ <div class="dashboard-grid">
+  <div class="panel"><div class="panel-head"><h3>نشاط المنصة</h3><span>آخر العمليات</span></div>
+   <div id="activityList">
+    <div class="activity"><div class="activity-icon">✓</div><div class="activity-info"><strong>تم تجهيز لوحة التحكم</strong><small>المنصة جاهزة لاستقبال البيانات</small></div><span class="activity-time">الآن</span></div>
+    <div class="activity"><div class="activity-icon">⌂</div><div class="activity-info"><strong>إدارة مصادر البيانات</strong><small>يمكن إضافة المستشفيات وأنظمتها</small></div><span class="activity-time">—</span></div>
+   </div>
+  </div>
+  <div class="panel"><div class="panel-head"><h3>ملخص المعالجة</h3><span>آخر تشغيل</span></div>
+   <div class="chart-wrap"><svg viewBox="0 0 400 180" preserveAspectRatio="none">
+    <g stroke="#edf1f3" stroke-width="1"><path d="M0 25H400M0 65H400M0 105H400M0 145H400"/></g>
+    <path d="M0 140 C45 135 55 110 95 118 S150 85 190 92 S245 55 285 70 S345 35 400 25" fill="none" stroke="#18a999" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 140 C45 135 55 110 95 118 S150 85 190 92 S245 55 285 70 S345 35 400 25 L400 180 L0 180Z" fill="#18a999" opacity=".08"/>
+    <path d="M0 155 C55 150 80 145 120 150 S190 135 230 142 S300 125 340 130 S370 120 400 115" fill="none" stroke="#82a9c6" stroke-width="2" stroke-dasharray="5 5"/>
+   </svg></div>
+   <div class="chart-labels"><span>بداية</span><span>معالجة</span><span>مطابقة</span><span>تصدير</span></div>
+   <div class="legend" style="margin-top:14px"><span><i style="background:#18a999"></i>السجلات المعالجة</span><span><i style="background:#82a9c6"></i>المراجعة</span></div>
+  </div>
+ </div>
+ <div class="panel"><div class="panel-head"><h3>خطوات العمل في MedBridge</h3><span>مسار البيانات</span></div>
+  <div class="integration-steps">
+   <div class="step-card"><div class="step-num">01</div><strong>استقبال البيانات</strong><p>استيراد ملفات بيانات المستشفيات وفق الصيغ المدعومة وإعدادات كل مصدر.</p></div>
+   <div class="step-card"><div class="step-num">02</div><strong>التوحيد والتحقق</strong><p>توحيد الحقول والتحقق من البيانات المطلوبة ورصد القيم غير المتوافقة.</p></div>
+   <div class="step-card"><div class="step-num">03</div><strong>المطابقة والتصدير</strong><p>مطابقة سجلات المرضى ومراجعة التعارضات وتجهيز المخرجات.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="page-hospitals">
+ <div class="page-heading">
+  <div><h1>المستشفيات والأنظمة</h1><p>إدارة الجهات الصحية ومصادر البيانات وإعدادات الربط.</p></div>
+  <button class="btn btn-primary" onclick="openHospitalModal()">＋ إضافة مستشفى</button>
+ </div>
+ <div class="notice">تسجيل المستشفى يعرّف مصدر البيانات داخل المنصة. لا يعني ذلك وجود اتصال مباشر بالنظام الفعلي للمستشفى إلا بعد توفير الربط والصلاحيات الفنية.</div>
+ <div class="table-card">
+  <div class="table-toolbar">
+   <div style="font-size:12px;font-weight:700">قائمة المستشفيات</div>
+   <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="hospitalSearch" placeholder="ابحث عن مستشفى..." oninput="filterTable('hospitalSearch','hospitalsTable')"></div>
+  </div>
+  <div style="overflow:auto">
+   <table id="hospitalsTable"><thead><tr><th>اسم المستشفى</th><th>المدينة</th><th>النظام الصحي</th><th>صيغة البيانات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="hospitalsBody"><tr><td colspan="6" class="empty">جارٍ تحميل المستشفيات...</td></tr></tbody></table>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="page-hospital-details">
+ <div class="page-heading">
+  <div><h1>تفاصيل المستشفى</h1><p>إدارة ملفات البيانات وحقول الربط واختبار إعدادات المصدر.</p></div>
+  <button class="btn btn-outline" onclick="navigate('hospitals')">→ العودة للمستشفيات</button>
+ </div>
+ <div id="hospitalDetailsContent"><div class="empty">جارٍ تحميل تفاصيل المستشفى...</div></div>
+</section>
+
+<section class="page" id="page-patients">
+ <div class="page-heading"><div><h1>سجل المرضى</h1><p>عرض نتائج سجلات المرضى بعد المعالجة والتوحيد.</p></div><button class="btn btn-outline" onclick="loadPatients()">↻ تحديث السجلات</button></div>
+ <div class="table-card">
+  <div class="table-toolbar"><div style="font-size:12px;font-weight:700">السجلات المتاحة</div>
+   <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="patientSearch" placeholder="ابحث برقم الهوية الوطنية..." oninput="renderPatients()"></div>
+  </div>
+  <div style="overflow:auto"><table id="patientsTable"><thead><tr><th>معرّف المريض</th><th>الاسم</th><th>تاريخ الميلاد</th><th>الجنس</th><th>المعرّف الوطني</th><th>المصدر</th></tr></thead><tbody id="patientsBody"><tr><td colspan="6" class="empty">لا توجد سجلات معروضة. شغّل المعالجة أولًا.</td></tr></tbody></table></div>
+ </div>
+</section>
+
+<section class="page" id="page-conflicts">
+ <div class="page-heading"><div><h1>مراجعة التعارضات</h1><p>مراجعة الحالات التي تتطلب قرارًا قبل اعتماد البيانات.</p></div><button class="btn btn-outline" onclick="loadConflicts()">↻ تحديث</button></div>
+ <div class="notice">لا يتم دمج سجلات المرضى اعتمادًا على تشابه الأسماء فقط. تتم مراجعة الحالات غير المؤكدة قبل اتخاذ قرار الدمج.</div>
+ <div class="table-card"><div class="table-toolbar"><div style="font-size:12px;font-weight:700">الحالات المسجلة</div></div>
+  <div style="overflow:auto"><table><thead><tr><th>رقم التعارض</th><th>اسم المريض</th><th>نوع التعارض</th><th>التفاصيل</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="conflictsBody"><tr><td colspan="5" class="empty">جارٍ تحميل التعارضات...</td></tr></tbody></table></div>
+ </div>
+</section>
+
+<section class="page" id="page-pipeline">
+ <div class="page-heading"><div><h1>معالجة البيانات</h1><p>تشغيل مسار استقبال البيانات وتوحيدها والتحقق منها ومطابقتها.</p></div></div>
+ <div class="panel">
+  <div class="panel-head"><h3>تشغيل مسار المعالجة</h3><span>Pipeline</span></div>
+  <p class="section-note">يقوم النظام بتنفيذ خطوات المعالجة المعرفة في إعدادات المشروع الحالية.</p>
+  <div class="integration-steps">
+   <div class="step-card"><div class="step-num">1</div><strong>قراءة المصادر</strong><p>قراءة ملفات المصادر المتاحة.</p></div>
+   <div class="step-card"><div class="step-num">2</div><strong>التحقق والتوحيد</strong><p>تطبيق قواعد التوحيد والتحقق.</p></div>
+   <div class="step-card"><div class="step-num">3</div><strong>المطابقة والنتائج</strong><p>تحديد المطابقات والتعارضات وإنتاج النتائج.</p></div>
+  </div>
+  <div style="margin-top:23px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+   <button class="btn btn-primary" id="runPipelineBtn" onclick="runPipeline()">▶ تشغيل المعالجة الآن</button>
+   <span id="pipelineStatus" style="font-size:11px;color:#82919c">جاهز للتشغيل</span>
+  </div>
+ </div>
+ <div class="panel"><div class="panel-head"><h3>نتيجة آخر تشغيل</h3><span id="lastRunTime">—</span></div><pre id="pipelineOutput" style="display:block;width:100%;height:290px;max-height:290px;overflow:auto;box-sizing:border-box;white-space:pre-wrap;padding:17px;direction:rtl;text-align:right;background:#f7f9fa;border:1px solid #edf0f2;border-radius:10px;font:13px/1.8 Consolas,monospace;color:#45616e;margin:0">لم يتم تشغيل المعالجة بعد.</pre></div>
+</section>
+
+<section class="page" id="page-reports">
+ <div class="page-heading"><div><h1>التقارير والإحصائيات</h1><p>نظرة عامة على مؤشرات البيانات وعمليات المنصة.</p></div><button class="btn btn-outline" onclick="refreshAll()">↻ تحديث المؤشرات</button></div>
+ <div class="stats">
+  <div class="stat-card"><div class="stat-label">المستشفيات</div><div class="stat-number" id="reportHospitals">0</div></div>
+  <div class="stat-card"><div class="stat-label">المرضى</div><div class="stat-number" id="reportPatients">0</div></div>
+  <div class="stat-card"><div class="stat-label">المطابقات</div><div class="stat-number" id="reportMatches">0</div></div>
+  <div class="stat-card"><div class="stat-label">التعارضات</div><div class="stat-number" id="reportConflicts">0</div></div>
+ </div>
+ <div class="panel"><div class="panel-head"><h3>ملخص حالة المنصة</h3></div><div id="reportSummary" style="font-size:12px;line-height:2.2;color:#627783">يتم تحديث المؤشرات عند تحميل البيانات من الخادم.</div></div>
+</section>
+
+</div>
+</main>
+</div>
+
+<div class="modal-backdrop" id="hospitalModal">
+ <div class="modal">
+  <div class="modal-head"><h3 id="hospitalModalTitle">إضافة مستشفى جديد</h3><button class="close-modal" onclick="closeHospitalModal()">×</button></div>
+  <form id="hospitalForm">
+   <input type="hidden" id="hospitalId">
+   <div class="form-grid">
+    <div class="field"><label>اسم المستشفى</label><input id="hospitalName" required placeholder="مثال: مستشفى الملك عبدالعزيز"></div>
+    <div class="field"><label>المدينة</label><input id="hospitalCity" required placeholder="مثال: جدة"></div>
+    <div class="field"><label>النظام الصحي المستخدم</label>
+     <select id="hospitalSystem" required>
+      <option value="">اختر النظام</option><option value="VIDA">VIDA</option><option value="BESTCare">BESTCare</option><option value="TrakCare">TrakCare</option><option value="IntelliCare">IntelliCare</option><option value="HIS">HIS</option><option value="Other">نظام آخر</option>
+     </select>
     </div>
-  </main>
-  <script>
-    const runButton = document.querySelector("#run-pipeline");
-    const status = document.querySelector("#pipeline-status");
-    const results = document.querySelector("#patient-results");
-    const rows = document.querySelector("#patient-rows");
-    const summary = document.querySelector("#run-summary");
-    const matchCount = document.querySelector("#match-count");
-    const conflictCount = document.querySelector("#conflict-count");
-    const fhirCount = document.querySelector("#fhir-count");
-    const hospitalNames = new Map([
-      ["hospital_a", "مستشفى A"],
-      ["hospital_b", "مستشفى B"],
-      ["hospital_c", "مستشفى C"],
-    ]);
+    <div class="field"><label>صيغة ملف البيانات</label>
+     <select id="hospitalFormat" required>
+      <option value="">اختر الصيغة</option><option value="JSON">JSON</option><option value="CSV">CSV</option>
+     </select>
+    </div>
+   </div>
+   <div class="notice warning" style="margin-top:15px">الرفع والمعالجة في النسخة الحالية يدعمان ملفات JSON وCSV. اختيار بروتوكول آخر لا يعني أنه أصبح مدعومًا في قارئ الملفات.</div>
+   <div class="form-actions"><button type="submit" class="btn btn-primary">حفظ البيانات</button><button type="button" class="btn btn-light" onclick="closeHospitalModal()">إلغاء</button></div>
+  </form>
+ </div>
+</div>
 
-    function showPatients(patients) {
-      const patientRows = patients.map((patient) => {
-        const row = document.createElement("tr");
-        const hospitals = (patient.sources ?? [])
-          .map((source) => hospitalNames.get(source) ?? source)
-          .join("، ");
+<div class="login-screen" id="loginScreen">
+ <div class="login-card">
+  <div class="login-brand"><div class="brand-mark"><svg viewBox="0 0 40 40" fill="none"><path d="M5 30H35M8 30V18L20 8L32 18V30M13 30V20H27V30" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div><strong>MedBridge</strong></div>
+  <h2>مرحبًا بعودتك</h2><p>سجّل الدخول للوصول إلى منصة تكامل البيانات الطبية.</p>
+  <form id="loginForm">
+   <div class="field"><label>رقم الهوية أو اسم المستخدم</label><input id="loginIdentity" required autocomplete="username" placeholder="أدخل بيانات الدخول"></div>
+   <div class="field"><label>كلمة المرور</label><input id="loginPassword" type="password" required autocomplete="current-password" placeholder="أدخل كلمة المرور"></div>
+   <button class="btn btn-primary" type="submit">تسجيل الدخول</button>
+  </form>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
 
-        for (const value of [patient.name, patient.birth_date, hospitals]) {
-          const cell = document.createElement("td");
-          cell.dir = "auto";
-          cell.textContent = value || "—";
-          row.append(cell);
-        }
+<script>
+const API="";
+let hospitals=[],patients=[],conflicts=[],lastPipeline=null;
+let currentHospital=null;
+let currentHospitalDetails=null;
+let detectedColumns=[];
+let currentMapping={};
 
-        return row;
-      });
+const pageNames={
+ dashboard:"لوحة التحكم",hospitals:"المستشفيات والأنظمة",
+ "hospital-details":"تفاصيل المستشفى",patients:"سجل المرضى",
+ conflicts:"مراجعة التعارضات",pipeline:"معالجة البيانات",reports:"التقارير والإحصائيات"
+};
 
-      rows.replaceChildren(...patientRows);
-      results.hidden = patientRows.length === 0;
+function toast(message){
+ const el=document.getElementById("toast");
+ el.textContent=message;el.classList.add("show");
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>el.classList.remove("show"),3500);
+}
+async function api(path,options={}){
+ const config={...options,headers:{...(options.headers||{})}};
+ if(config.body && typeof config.body!=="string" && !(config.body instanceof FormData)){
+  config.headers["Content-Type"]="application/json";
+  config.body=JSON.stringify(config.body);
+ }
+ const response=await fetch(API+path,config);
+ const text=await response.text();
+ let data={};
+ try{data=text?JSON.parse(text):{};}catch{data={detail:text};}
+ if(!response.ok){
+  let message=data.detail||data.message||`خطأ في الخادم (${response.status})`;
+  if(Array.isArray(message))message=message.map(x=>x.msg||JSON.stringify(x)).join("، ");
+  throw new Error(typeof message==="string"?message:JSON.stringify(message));
+ }
+ return data;
+}
+function safe(value){
+ return String(value??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function listFrom(data,keys){
+ if(Array.isArray(data))return data;
+ for(const k of keys)if(Array.isArray(data?.[k]))return data[k];
+ return [];
+}
+function statusBadge(value){
+ const s=String(value??"").toLowerCase();
+ if(["active","نشط","connected","success","completed","configured","true"].includes(s))return '<span class="status ok">نشط</span>';
+ if(["pending","معلق","review","قيد المراجعة","testing"].includes(s))return '<span class="status pending">قيد المراجعة</span>';
+ if(["error","failed","inactive","غير نشط"].includes(s))return '<span class="status error">غير نشط</span>';
+ return '<span class="status off">غير محدد</span>';
+}
+function hospitalId(h){return h.id??h.hospital_id??h.code}
+function navigate(name){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
+ const page=document.getElementById("page-"+name);
+ if(page)page.classList.add("active");
+ document.getElementById("crumb").textContent=pageNames[name]||"";
+ document.getElementById("sidebar").classList.remove("open");
+ if(name==="hospitals")loadHospitals();
+ if(name==="patients")loadPatients();
+ if(name==="conflicts")loadConflicts();
+ if(name==="reports")updateReports();
+}
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
+document.getElementById("menuBtn").addEventListener("click",()=>document.getElementById("sidebar").classList.toggle("open"));
+
+async function loadHospitals(){
+ const body=document.getElementById("hospitalsBody");
+ body.innerHTML='<tr><td colspan="6" class="empty">جارٍ تحميل المستشفيات...</td></tr>';
+ try{
+  const data=await api("/hospitals");
+  hospitals=listFrom(data,["hospitals","items","results","data"]);
+  renderHospitals();updateStats();
+  document.getElementById("connectionText").textContent="تم تحميل بيانات المستشفيات";
+ }catch(e){
+  body.innerHTML='<tr><td colspan="6" class="empty">تعذر تحميل المستشفيات: '+safe(e.message)+'</td></tr>';
+  document.getElementById("connectionText").textContent="تعذر الاتصال بواجهة المستشفيات";
+ }
+}
+function renderHospitals(){
+ const body=document.getElementById("hospitalsBody");
+ if(!hospitals.length){body.innerHTML='<tr><td colspan="6" class="empty">لا توجد مستشفيات مسجلة حتى الآن.</td></tr>';return}
+ body.innerHTML=hospitals.map((h,i)=>{
+  const id=hospitalId(h)??i;
+  return `<tr>
+   <td><button class="hospital-name-link" onclick="openHospitalDetails('${safe(id)}')">${safe(h.name??h.hospital_name)}</button></td>
+   <td>${safe(h.city??h.location)}</td>
+   <td>${safe(h.system_name??h.system??h.his_system)}</td>
+   <td>${safe(h.data_format??h.format??h.protocol)}</td>
+   <td>${statusBadge(h.status??(h.is_active?"active":"inactive"))}</td>
+   <td><button class="action-link" onclick="editHospital('${safe(id)}')">تعديل</button> <button class="action-link" onclick="openHospitalDetails('${safe(id)}')">التفاصيل ←</button></td>
+  </tr>`;
+ }).join("");
+}
+function openHospitalModal(){
+ document.getElementById("hospitalForm").reset();
+ document.getElementById("hospitalId").value="";
+ document.getElementById("hospitalModalTitle").textContent="إضافة مستشفى جديد";
+ document.getElementById("hospitalModal").classList.add("show");
+}
+function closeHospitalModal(){document.getElementById("hospitalModal").classList.remove("show")}
+function editHospital(id){
+ const h=hospitals.find(x=>String(hospitalId(x))===String(id));
+ if(!h)return;
+ document.getElementById("hospitalId").value=hospitalId(h);
+ document.getElementById("hospitalName").value=h.name??h.hospital_name??"";
+ document.getElementById("hospitalCity").value=h.city??h.location??"";
+ document.getElementById("hospitalSystem").value=h.system_name??h.system??h.his_system??"";
+ document.getElementById("hospitalFormat").value=h.data_format??h.format??"";
+ document.getElementById("hospitalModalTitle").textContent="تعديل بيانات المستشفى";
+ document.getElementById("hospitalModal").classList.add("show");
+}
+document.getElementById("hospitalForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const id=document.getElementById("hospitalId").value;
+ const payload={
+  name:document.getElementById("hospitalName").value.trim(),
+  city:document.getElementById("hospitalCity").value.trim(),
+  system_name:document.getElementById("hospitalSystem").value,
+  data_format:document.getElementById("hospitalFormat").value
+ };
+ try{
+  await api(id?`/hospitals/${encodeURIComponent(id)}`:"/hospitals",{method:id?"PUT":"POST",body:payload});
+  closeHospitalModal();toast(id?"تم تحديث بيانات المستشفى":"تم تسجيل المستشفى");
+  await loadHospitals();
+ }catch(err){toast("تعذر الحفظ: "+err.message)}
+});
+
+/* صفحة تفاصيل المستشفى */
+async function openHospitalDetails(id){
+ currentHospital=id;
+ navigate("hospital-details");
+ const host=document.getElementById("hospitalDetailsContent");
+ host.innerHTML='<div class="empty">جارٍ تحميل تفاصيل المستشفى...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(id)}`);
+  currentHospitalDetails=data.hospital||data;
+  const h=currentHospitalDetails;
+  currentMapping=h.mapping||{};
+  detectedColumns=Array.isArray(h.detected_columns)?h.detected_columns:[];
+  renderHospitalDetails(h);
+ }catch(e){
+  const h=hospitals.find(x=>String(hospitalId(x))===String(id));
+  if(h){
+   currentHospitalDetails=h;currentMapping=h.mapping||{};
+   renderHospitalDetails(h);
+   toast("تعذر تحميل التفاصيل الكاملة؛ تم عرض البيانات المتاحة من القائمة: "+e.message);
+  }else{
+   host.innerHTML='<div class="notice warning">تعذر تحميل تفاصيل المستشفى: '+safe(e.message)+'</div>';
+  }
+ }
+}
+function renderHospitalDetails(h){
+ const id=hospitalId(h)??currentHospital;
+ const files=listFrom(h,["files","hospital_files","uploads"]);
+ const mapping=h.mapping||currentMapping||{};
+ const fields=[
+  ["source_patient_id","معرّف المريض في المصدر"],
+  ["national_id","رقم الهوية الوطنية"],
+  ["name","اسم المريض"],
+  ["birth_date","تاريخ الميلاد"],
+  ["gender","الجنس"]
+ ];
+ const fileRows=files.length?files.map(f=>`<div class="activity">
+  <div class="activity-icon">▤</div>
+  <div class="activity-info"><strong>${safe(f.original_name??f.filename??f.file_name??"ملف بيانات")}</strong>
+  <small>${safe(f.uploaded_at??f.created_at??f.status??"تم الرفع")}</small></div>
+  ${statusBadge(f.status??"uploaded")}
+ </div>`).join(""):'<div class="empty">لم يتم رفع ملفات لهذا المستشفى بعد.</div>';
+
+ document.getElementById("hospitalDetailsContent").innerHTML=`
+ <div class="panel">
+  <div class="details-header">
+   <div class="details-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg></div>
+   <div class="details-title"><h2>${safe(h.name??h.hospital_name)}</h2><p>${safe(h.city??h.location)} · ${safe(h.system_name??h.system??"النظام غير محدد")}</p></div>
+   ${statusBadge(h.status??"غير محدد")}
+   <button class="btn btn-outline" onclick="editHospital('${safe(id)}')">تعديل البيانات</button>
+  </div>
+  <div class="details-grid">
+   <div class="info-item"><small>رمز المستشفى</small><strong>${safe(h.code)}</strong></div>
+   <div class="info-item"><small>النظام الصحي</small><strong>${safe(h.system_name??h.system)}</strong></div>
+   <div class="info-item"><small>صيغة البيانات</small><strong>${safe(h.data_format??h.format)}</strong></div>
+   <div class="info-item"><small>حالة الإعداد</small><strong>${safe(h.status)}</strong></div>
+  </div>
+ </div>
+
+ <div class="panel">
+  <div class="panel-head"><h3>1. رفع ملف بيانات المستشفى</h3><span>JSON / CSV · الحد الأقصى 15MB</span></div>
+  <p class="section-note">ارفع عينة بيانات المرضى الخاصة بهذا المستشفى. يجب أن يكون ملف JSON على هيئة قائمة سجلات أو ملف CSV يحتوي على صف عناوين للأعمدة.</p>
+
+<label class="file-drop" for="hospitalFile">
+ <span class="file-icon">↑</span>
+ <strong>اضغط لاختيار ملف البيانات</strong>
+ <small>الصيغ المدعومة: JSON و CSV</small>
+ <input type="file" id="hospitalFile" accept=".json,.csv" onchange="showSelectedFile(this)">
+</label>
+
+<div class="selected-file-card" id="selectedFileCard">
+ <div class="selected-file-icon">▤</div>
+ <div class="selected-file-info">
+  <strong id="selectedFileName">—</strong>
+  <small id="selectedFileSize">—</small>
+ </div>
+</div>
+
+  </label>
+  <div class="form-actions"><button class="btn btn-primary" onclick="uploadHospitalFile()">رفع الملف</button></div>
+  <div id="uploadResult" style="margin-top:12px"></div>
+  <div style="margin-top:20px"><h4 class="detail-section-title">الملفات المرفوعة</h4><div id="hospitalFilesList">${fileRows}</div></div>
+ </div>
+
+ <div class="panel">
+  <div class="panel-head"><h3>2. تحليل أعمدة الملف</h3><span>تحليل بنية البيانات</span></div>
+  <p class="section-note">بعد رفع الملف، حلّل الأعمدة ليتم تجهيز خيارات ربط حقول المصدر بالحقول الموحدة في MedBridge.</p>
+  <button class="btn btn-outline" onclick="analyzeHospital()">تحليل الملف والأعمدة</button>
+  <div id="analysisResult" style="margin-top:15px"></div>
+ </div>
+
+ <div class="panel">
+  <div class="panel-head"><h3>3. إعداد ربط الحقول</h3><span>Field Mapping</span></div>
+  <p class="section-note">اختر العمود المقابل لكل حقل موحد. اترك الحقل فارغًا إذا لم يكن موجودًا في الملف.</p>
+  <div id="mappingFields">${renderMappingFields(fields,mapping)}</div>
+  <div class="form-actions"><button class="btn btn-primary" onclick="saveHospitalMapping()">حفظ إعدادات الربط</button></div>
+  <div id="mappingResult" style="margin-top:12px"></div>
+ </div>
+
+ <div class="panel">
+  <div class="panel-head"><h3>4. اختبار الإعدادات وتفعيل المستشفى</h3><span>Validation</span></div>
+  <div class="step-status ${h.test_result?'done':''}"><span class="bullet"></span> اختبار توافق الملف مع إعدادات الربط</div>
+  <div class="step-status ${String(h.status).toLowerCase()==='configured'?'done':''}"><span class="bullet"></span> تفعيل المصدر لإدخاله في مسار المعالجة</div>
+  <div class="form-actions">
+   <button class="btn btn-outline" onclick="testHospital()">اختبار الإعدادات</button>
+   <button class="btn btn-primary" onclick="activateHospital()">تفعيل المستشفى</button>
+  </div>
+  <div id="testResult" style="margin-top:14px"></div>
+ </div>`;
+}
+function renderMappingFields(fields,mapping){
+ return fields.map(([key,label])=>{
+  const selected=mapping?.[key]??"";
+  const options=[...new Set([...detectedColumns,...(selected?[selected]:[])])];
+  return `<div class="mapping-row">
+   <label>${safe(label)} <small style="display:block;color:#9aa7ae;font-weight:400;direction:ltr;text-align:right">${safe(key)}</small></label>
+   <select data-map-key="${safe(key)}">
+    <option value="">— اختر عمود المصدر —</option>
+    ${options.map(col=>`<option value="${safe(col)}" ${String(col)===String(selected)?"selected":""}>${safe(col)}</option>`).join("")}
+   </select>
+  </div>`;
+ }).join("");
+}
+
+function showSelectedFile(input){
+ const file=input.files?.[0];
+ const card=document.getElementById("selectedFileCard");
+ const name=document.getElementById("selectedFileName");
+ const size=document.getElementById("selectedFileSize");
+
+ if(!file){
+  card.classList.remove("show");
+  return;
+ }
+
+ name.textContent=file.name;
+
+ const bytes=file.size;
+ let formattedSize;
+
+ if(bytes < 1024){
+  formattedSize=bytes+" بايت";
+ }else if(bytes < 1024*1024){
+  formattedSize=(bytes/1024).toFixed(1)+" KB";
+ }else{
+  formattedSize=(bytes/(1024*1024)).toFixed(2)+" MB";
+ }
+
+ size.textContent="حجم الملف: "+formattedSize;
+ card.classList.add("show");
+}
+
+async function uploadHospitalFile(){
+ const input=document.getElementById("hospitalFile");
+ const file=input.files?.[0];
+ if(!file){toast("اختر ملفًا أولًا");return}
+ if(file.size>15*1024*1024){toast("حجم الملف يتجاوز الحد الأقصى 15MB");return}
+ const ext=file.name.split(".").pop().toLowerCase();
+ if(!["json","csv"].includes(ext)){toast("الصيغة غير مدعومة. استخدم JSON أو CSV");return}
+ const form=new FormData();form.append("file",file);
+ const result=document.getElementById("uploadResult");
+ result.innerHTML='<div class="notice">جارٍ رفع الملف...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/upload`,{method:"POST",body:form});
+  result.innerHTML='<div class="notice">تم رفع الملف بنجاح. يمكنك الآن تحليل الأعمدة.</div>';
+  toast("تم رفع ملف المستشفى");
+  await openHospitalDetails(currentHospital);
+ }catch(e){
+  result.innerHTML='<div class="notice warning">تعذر رفع الملف: '+safe(e.message)+'</div>';
+  toast("فشل رفع الملف: "+e.message);
+ }
+}
+async function analyzeHospital(){
+ const target=document.getElementById("analysisResult");
+ target.innerHTML='<div class="notice">جارٍ تحليل ملف المستشفى...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/analyze`,{method:"POST"});
+  let columns=data.columns||data.detected_columns||data.fields||data.source_fields||[];
+  if(!Array.isArray(columns)&&columns&&typeof columns==="object")columns=Object.keys(columns);
+  detectedColumns=columns.map(x=>typeof x==="string"?x:(x.name??x.field??String(x)));
+  if(!detectedColumns.length&&Array.isArray(data.records)&&data.records[0])detectedColumns=Object.keys(data.records[0]);
+  const resultFields=[
+   ["source_patient_id","معرّف المريض في المصدر"],["national_id","رقم الهوية الوطنية"],
+   ["name","اسم المريض"],["birth_date","تاريخ الميلاد"],["gender","الجنس"]
+  ];
+  document.getElementById("mappingFields").innerHTML=renderMappingFields(resultFields,currentMapping);
+  target.innerHTML=`<div class="notice">اكتمل تحليل الملف. تم التعرف على ${detectedColumns.length} عمودًا.</div>
+   <div style="display:flex;gap:7px;flex-wrap:wrap">${detectedColumns.map(c=>`<span class="status off">${safe(c)}</span>`).join("")||"لم يتم العثور على أعمدة"}</div>`;
+  toast("اكتمل تحليل الملف");
+ }catch(e){
+  target.innerHTML='<div class="notice warning">تعذر تحليل الملف: '+safe(e.message)+'</div>';
+  toast("فشل تحليل الملف: "+e.message);
+ }
+}
+async function saveHospitalMapping(){
+ const selects=document.querySelectorAll("[data-map-key]");
+ const mapping={};
+ selects.forEach(select=>{if(select.value)mapping[select.dataset.mapKey]=select.value});
+ const required=["source_patient_id","name","birth_date","gender"];
+ const missing=required.filter(k=>!mapping[k]);
+ if(missing.length){
+  toast("أكمل ربط الحقول الأساسية أولًا: "+missing.join("، "));
+  return;
+ }
+ const target=document.getElementById("mappingResult");
+ target.innerHTML='<div class="notice">جارٍ حفظ إعدادات الربط...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/mapping`,{
+   method:"PUT",body:{mapping}
+  });
+  currentMapping=mapping;
+  target.innerHTML='<div class="notice">تم حفظ إعدادات ربط الحقول بنجاح.</div>';
+  toast("تم حفظ إعدادات الربط");
+ }catch(e){
+  target.innerHTML='<div class="notice warning">تعذر حفظ الإعدادات: '+safe(e.message)+'</div>';
+  toast("تعذر حفظ الربط: "+e.message);
+ }
+}
+async function testHospital(){
+ const target=document.getElementById("testResult");
+ target.innerHTML='<div class="notice">جارٍ اختبار إعدادات المستشفى...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/test`,{method:"POST"});
+  target.innerHTML='<div class="notice">تم تنفيذ الاختبار. <pre class="result-box">'+safe(JSON.stringify(data,null,2))+'</pre></div>';
+  toast("اكتمل اختبار الإعدادات");
+ }catch(e){
+  target.innerHTML='<div class="notice warning">لم يجتز المستشفى الاختبار أو تعذر تنفيذه: '+safe(e.message)+'</div>';
+  toast("نتيجة الاختبار: "+e.message);
+ }
+}
+async function activateHospital(){
+ if(!confirm("هل تريد تفعيل هذا المستشفى وإدخال ملفاته ضمن مصادر المعالجة؟"))return;
+ const target=document.getElementById("testResult");
+ target.innerHTML='<div class="notice">جارٍ تفعيل المستشفى...</div>';
+ try{
+  const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/activate`,{method:"POST"});
+  target.innerHTML='<div class="notice">تم إرسال طلب التفعيل بنجاح.</div>';
+  toast("تم تفعيل المستشفى");
+  await loadHospitals();
+  await openHospitalDetails(currentHospital);
+ }catch(e){
+  target.innerHTML='<div class="notice warning">تعذر تفعيل المستشفى: '+safe(e.message)+'</div>';
+  toast("تعذر التفعيل: "+e.message);
+ }
+}
+
+async function loadPatients(){
+ const body = document.getElementById("patientsBody");
+ if(!body) return;
+
+ body.innerHTML = '<tr><td colspan="6" class="empty">جارٍ تحميل السجلات...</td></tr>';
+
+ try{
+  const data = await api("/pipeline/latest");
+  lastPipeline = data;
+
+  // استخراج نتيجة المعالجة
+  const root = data?.result || data?.data || data || {};
+
+  // استخراج قائمة المرضى من أكثر من شكل محتمل للبيانات
+  function extractPatients(obj, depth = 0){
+   if(!obj || typeof obj !== "object" || depth > 5) return [];
+
+   const keys = [
+    "patients",
+    "unified_patients",
+    "patient_records",
+    "records"
+   ];
+
+   for(const key of keys){
+    if(Array.isArray(obj[key])) return obj[key];
+   }
+
+   for(const value of Object.values(obj)){
+    if(value && typeof value === "object"){
+     const found = extractPatients(value, depth + 1);
+     if(found.length) return found;
+    }
+   }
+
+   return [];
+  }
+
+  patients = extractPatients(root);
+
+  renderPatients();
+  updateStats();
+
+ }catch(e){
+  console.error("Patients loading error:", e);
+  body.innerHTML =
+   '<tr><td colspan="6" class="empty">تعذر تحميل السجلات: ' +
+   safe(e.message) +
+   '</td></tr>';
+ }
+}
+
+
+function openPatientDetails(index) {
+    const patient = window.visiblePatients?.[index];
+
+    if (!patient) {
+        alert("تعذر العثور على سجل المريض.");
+        return;
     }
 
-    runButton.addEventListener("click", async () => {
-      runButton.disabled = true;
-      summary.hidden = true;
-      results.hidden = true;
-      status.hidden = false;
-      status.textContent = "جاري تشغيل المعالجة…";
+    document.getElementById("patientDetailsModal")?.remove();
 
-      try {
-        const response = await fetch("/pipeline/run", { method: "POST" });
-        if (!response.ok) {
-          throw new Error("Pipeline request failed");
+    const esc = value => safe(String(value ?? "—"));
+
+    const sourceName = source => {
+        const names = {
+            hospital_a: "المستشفى A",
+            hospital_b: "المستشفى B",
+            hospital_c: "المستشفى C"
+        };
+        return names[source] || source || "غير محدد";
+    };
+
+    const statusName = status => {
+        const names = {
+            active: "نشط",
+            inactive: "غير نشط",
+            confirmed: "مؤكدة",
+            unconfirmed: "غير مؤكدة",
+            completed: "مكتمل",
+            stopped: "متوقف",
+            resolved: "تم علاجه",
+            unknown: "غير محدد",
+            planned: "مخطط",
+            in_progress: "قيد التنفيذ",
+            "not-done": "لم يتم"
+        };
+        return names[status] || status || "غير محدد";
+    };
+
+    const section = (title, items, renderer, emptyMessage) => {
+        if (!Array.isArray(items) || !items.length) {
+            return `
+                <section class="medical-section">
+                    <h3>${title}</h3>
+                    <p class="medical-empty">${emptyMessage}</p>
+                </section>
+            `;
         }
 
-        const result = await response.json();
-        if (result.status !== "completed" || !Array.isArray(result.patients)) {
-          throw new Error("Unexpected pipeline result");
-        }
+        return `
+            <section class="medical-section">
+                <h3>${title}</h3>
+                <div class="medical-grid">
+                    ${items.map(renderer).join("")}
+                </div>
+            </section>
+        `;
+    };
 
-        showPatients(result.patients);
-        matchCount.textContent = result.matches.length;
-        conflictCount.textContent = result.conflicts.length;
-        fhirCount.textContent = result.fhir_resources.length;
-        summary.hidden = false;
-        status.textContent = "اكتملت المعالجة. عدد المرضى: " + result.patients.length;
-      } catch {
-        status.textContent = "تعذر تشغيل المعالجة. جرّبي مرة ثانية.";
-      } finally {
-        runButton.disabled = false;
-      }
+    const card = (title, rows) => `
+        <article class="medical-card">
+            <h4>${esc(title)}</h4>
+            ${rows.map(([label, value]) => `
+                <div class="medical-row">
+                    <span>${esc(label)}</span>
+                    <strong>${esc(value)}</strong>
+                </div>
+            `).join("")}
+        </article>
+    `;
+
+    const observations = patient.observations || [];
+    const medications = patient.medications || [];
+    const allergies = patient.allergies || [];
+    const diagnoses = patient.diagnoses || [];
+    const procedures = patient.procedures || [];
+    const medicalHistory = patient.medical_history || [];
+    const encounters = patient.encounters || [];
+    const immunizations = patient.immunizations || [];
+    const familyHistory = patient.family_history || [];
+
+    const modal = document.createElement("div");
+    modal.id = "patientDetailsModal";
+    modal.className = "medical-modal";
+
+    modal.innerHTML = `
+        <div class="medical-panel">
+
+            <div class="medical-header">
+                <div>
+                    <div class="medical-kicker">MEDBRIDGE · الملف الصحي</div>
+                    <h2>${esc(patient.name || patient.full_name)}</h2>
+                    <p>رقم الهوية: ${esc(patient.national_id)}</p>
+                </div>
+
+                <button id="closePatientDetails" class="medical-close">
+                    إغلاق
+                </button>
+            </div>
+
+            <section class="medical-section">
+                <h3>المعلومات الأساسية</h3>
+                <div class="medical-grid">
+                    ${card("بيانات المريض", [
+                        ["معرّف المريض", patient.id],
+                        ["تاريخ الميلاد", patient.birth_date],
+                        ["الجنس", patient.gender === "female" ? "أنثى" :
+                            patient.gender === "male" ? "ذكر" : patient.gender],
+                        ["رقم الهوية الوطنية", patient.national_id]
+                    ])}
+                </div>
+            </section>
+
+            ${section("الفحوصات والقياسات", observations, item =>
+                card(
+                    item.type === "weight" ? "الوزن" :
+                    item.type === "height" ? "الطول" :
+                    item.type || "فحص طبي",
+                    [
+                        ["النتيجة", `${item.value ?? "—"} ${item.unit || ""}`],
+                        ["التاريخ", item.date],
+                        ["المصدر", sourceName(item.source)]
+                    ]
+                ),
+                "لا توجد فحوصات مسجلة."
+            )}
+
+            ${section("التشخيصات", diagnoses, item =>
+                card(item.description || "تشخيص طبي", [
+                    ["رمز التشخيص", item.code],
+                    ["الوصف", item.description],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد تشخيصات مسجلة."
+            )}
+
+            ${section("التاريخ المرضي والأمراض المزمنة والسابقة", medicalHistory, item =>
+                card(item.condition || "حالة مرضية", [
+                    ["الحالة المرضية", item.condition],
+                    ["رمز الحالة", item.code],
+                    ["تاريخ بداية الحالة", item.onset_date],
+                    ["تاريخ انتهاء الحالة", item.resolved_date],
+                    ["الحالة", statusName(item.status)],
+                    ["ملاحظات", item.notes],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا يوجد تاريخ مرضي إضافي مسجل."
+            )}
+
+            ${section("العمليات والإجراءات الطبية", procedures, item =>
+                card(item.name || "إجراء طبي", [
+                    ["اسم العملية أو الإجراء", item.name],
+                    ["نوع الإجراء", item.procedure_type],
+                    ["التاريخ", item.date],
+                    ["الحالة", statusName(item.status)],
+                    ["النتيجة", item.outcome],
+                    ["ملاحظات", item.notes],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد عمليات أو إجراءات طبية مسجلة."
+            )}
+
+            ${section("الزيارات الطبية والتنويم", encounters, item =>
+                card(item.encounter_type || "زيارة طبية", [
+                    ["نوع الزيارة", item.encounter_type],
+                    ["التاريخ", item.date],
+                    ["سبب الزيارة", item.reason],
+                    ["التشخيص", item.diagnosis],
+                    ["الموقع", item.location],
+                    ["الحالة", statusName(item.status)],
+                    ["ملاحظات", item.notes],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد زيارات أو حالات تنويم مسجلة."
+            )}
+
+            ${section("الأدوية", medications, item =>
+                card(item.name || "دواء", [
+                    ["الجرعة", item.dose],
+                    ["الحالة", statusName(item.status)],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد أدوية مسجلة."
+            )}
+
+            ${section("الحساسية", allergies, item =>
+                card(item.substance || "حساسية", [
+                    ["مادة الحساسية", item.substance],
+                    ["ردة الفعل", item.reaction],
+                    ["حالة التأكيد", statusName(item.status)],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد حساسيات مسجلة."
+            )}
+
+            ${section("التطعيمات", immunizations, item =>
+                card(item.vaccine || "تطعيم", [
+                    ["اسم اللقاح", item.vaccine],
+                    ["تاريخ التطعيم", item.date],
+                    ["الجرعة", item.dose],
+                    ["الحالة", statusName(item.status)],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا توجد تطعيمات مسجلة."
+            )}
+
+            ${section("التاريخ العائلي المرضي", familyHistory, item =>
+                card(item.condition || "حالة مرضية عائلية", [
+                    ["الحالة المرضية", item.condition],
+                    ["صلة القرابة", item.relationship],
+                    ["ملاحظات", item.notes],
+                    ["المصدر", sourceName(item.source)]
+                ]),
+                "لا يوجد تاريخ عائلي مرضي مسجل."
+            )}
+
+            <section class="medical-section">
+                <h3>مصادر البيانات</h3>
+                <div class="medical-sources">
+                    ${(patient.sources || []).map(source => `
+                        <span>${esc(sourceName(source))}</span>
+                    `).join("") || "لا توجد مصادر مسجلة"}
+                </div>
+            </section>
+
+            <div class="medical-footer">
+                البيانات المعروضة مستخرجة من السجل الموحد للمريض.
+                الأقسام التي لا تحتوي على بيانات تظهر بوضوح دون افتراض وجود تاريخ طبي غير مسجل.
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("closePatientDetails").onclick = () => {
+        modal.remove();
+    };
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) modal.remove();
     });
-  </script>
+}
+
+
+
+function renderPatients() {
+    const body = document.getElementById("patientsBody");
+    if (!body) return;
+
+    const searchInput = document.getElementById("patientSearch");
+
+    const query = String(searchInput?.value || "")
+        .trim()
+        .replace(/\s/g, "")
+        .toLowerCase();
+
+    const filteredPatients = patients.filter(p => {
+        const nationalId = String(
+            p.national_id ??
+            p.national_number ??
+            p.national_id_number ??
+            ""
+        ).replace(/\s/g, "").toLowerCase();
+
+        return !query || nationalId.includes(query);
+    });
+
+    window.visiblePatients = filteredPatients;
+
+    if (!filteredPatients.length) {
+        body.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty">
+                    لا توجد سجلات مطابقة لرقم الهوية.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    body.innerHTML = filteredPatients.map((p, index) => `
+        <tr data-patient-index="${index}"
+            style="cursor:pointer"
+            title="اضغط لعرض تفاصيل المريض">
+
+            <td>${safe(p.id ?? p.patient_id ?? p.source_patient_id ?? "—")}</td>
+
+            <td><strong>${safe(p.name ?? p.full_name ?? p.patient_name ?? "غير محدد")}</strong></td>
+
+            <td>${safe(p.birth_date ?? p.date_of_birth ?? "—")}</td>
+
+            <td>${safe(p.gender ?? "—")}</td>
+
+            <td>${safe(p.national_id ?? p.national_number ?? p.national_id_number ?? "—")}</td>
+
+            <td>${safe(p.source ?? p.hospital ?? p.source_system ?? "—")}</td>
+        </tr>
+    `).join("");
+
+    body.querySelectorAll("[data-patient-index]").forEach(row => {
+        row.addEventListener("click", () => {
+            openPatientDetails(Number(row.dataset.patientIndex));
+        });
+    });
+}
+
+
+async function loadConflicts() {
+    const body = document.getElementById("conflictsBody");
+    if (!body) return;
+
+    body.innerHTML = '<tr><td colspan="5" class="empty">جارٍ تحميل التعارضات...</td></tr>';
+
+    try {
+        const data = await api("/conflicts");
+
+        let list = listFrom(data, [
+            "conflicts",
+            "items",
+            "results",
+            "data"
+        ]);
+
+        if (!list.length && Array.isArray(data)) {
+            list = data;
+        }
+
+        if (!list.length && data?.result) {
+            list = listFrom(data.result, [
+                "conflicts",
+                "items",
+                "results",
+                "data"
+            ]);
+        }
+
+        conflicts = list;
+        renderConflicts();
+        updateStats();
+
+    } catch (error) {
+        console.error("Conflicts loading error:", error);
+        body.innerHTML =
+            '<tr><td colspan="5" class="empty">تعذر تحميل التعارضات: ' +
+            safe(error.message) +
+            '</td></tr>';
+    }
+}
+
+function renderConflicts() {
+    const body = document.getElementById("conflictsBody");
+    if (!body) return;
+
+    window.medBridgeConflicts = conflicts;
+
+    if (!conflicts.length) {
+        body.innerHTML =
+            '<tr><td colspan="6" class="empty">لا توجد تعارضات حاليًا.</td></tr>';
+        return;
+    }
+
+    body.innerHTML = conflicts.map((c, index) => `
+        <tr>
+            <td>${safe(c.id ?? c.conflict_id ?? index + 1)}</td>
+            <td><strong>${safe(c.patient_name || "غير متوفر")}</strong></td>
+            <td>${safe(c.field ?? c.field_name ?? c.type ?? "تعارض بيانات")}</td>
+            <td>${safe(c.reason ?? c.description ?? "يوجد اختلاف بين القيم")}</td>
+            <td>${safe(c.status ?? "بانتظار المراجعة")}</td>
+            <td>
+                <button class="action-link" data-conflict-index="${index}">
+                    مراجعة التعارض
+                </button>
+            </td>
+        </tr>
+    `).join("");
+
+    body.querySelectorAll("[data-conflict-index]").forEach(button => {
+        button.addEventListener("click", () => {
+            openConflictReview(Number(button.dataset.conflictIndex));
+        });
+    });
+}
+
+
+
+
+function conflictReviewEscape(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[char]));
+}
+
+function openConflictReview(index) {
+    const conflict = window.medBridgeConflicts?.[index];
+    if (!conflict) return;
+
+    const values = Array.isArray(conflict.values)
+        ? conflict.values
+        : Object.values(conflict.values || {});
+
+    const sources = conflict.sources || [];
+
+    const entries = values.map((item, i) => {
+        const isObject = item !== null && typeof item === "object";
+
+        const value = isObject && "value" in item
+            ? item.value
+            : item;
+
+        const source = isObject && item.source
+            ? item.source
+            : (
+                Array.isArray(sources)
+                    ? sources[i] || `المصدر ${i + 1}`
+                    : `المصدر ${i + 1}`
+            );
+
+        return {
+            value,
+            source,
+            submittedValue: typeof value === "object"
+                ? JSON.stringify(value)
+                : String(value ?? "")
+        };
+    });
+
+    const valuesHTML = entries.map((item, i) => `
+        <label class="conflict-value-option">
+            <input type="radio"
+                   name="conflictSelectedValue"
+                   value="${i}">
+
+            <span>
+                <strong>
+                    ${conflictReviewEscape(item.source)}
+                </strong>
+
+                <span>
+                    ${conflictReviewEscape(item.submittedValue)}
+                </span>
+            </span>
+        </label>
+    `).join("");
+
+    document.getElementById("conflictReviewModal")?.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "conflictReviewModal";
+    modal.className = "conflict-review-modal";
+
+    modal.innerHTML = `
+        <div class="conflict-review-panel">
+
+            <div style="display:flex;justify-content:space-between;gap:12px">
+                <div>
+                    <h2>مراجعة التعارض</h2>
+                    <div class="conflict-review-muted">
+                        قارن القيم واختر القرار المناسب
+                    </div>
+                </div>
+
+                <button class="conflict-review-cancel"
+                        id="closeConflictReview">
+                    إغلاق
+                </button>
+            </div>
+
+            <hr style="border:0;border-top:1px solid #e8eeeb;margin:18px 0">
+
+            <p>
+                <strong>المريض:</strong>
+                ${conflictReviewEscape(
+                    conflict.patient_name || conflict.patient_id || "غير محدد"
+                )}
+            </p>
+
+            <p>
+                <strong>الحقل المتعارض:</strong>
+                ${conflictReviewEscape(
+                    conflict.field || conflict.conflict_type || "غير محدد"
+                )}
+            </p>
+
+            <p><strong>سبب التعارض:</strong></p>
+
+            <div style="background:#f5f8f7;padding:13px;border-radius:10px">
+                ${conflictReviewEscape(
+                    conflict.reason ||
+                    conflict.description ||
+                    "تم اكتشاف اختلاف بين القيم المسجلة في المصادر."
+                )}
+            </div>
+
+            <h3 style="margin:22px 0 10px">
+                القيم المسجلة ومصادرها
+            </h3>
+
+            ${
+                valuesHTML ||
+                `<p class="conflict-review-muted">
+                    لا توجد تفاصيل للقيم في بيانات هذا التعارض.
+                </p>`
+            }
+
+            <div style="margin-top:22px">
+                <strong>سبب القرار أو ملاحظات المراجعة</strong>
+
+                <textarea id="conflictDecisionReason"
+                          class="conflict-review-reason"
+                          placeholder="اكتب سبب اختيار هذه القيمة أو سبب رفض التعارض..."></textarea>
+            </div>
+
+            <div class="conflict-review-actions">
+                <button class="conflict-review-btn"
+                        id="saveConflictChoice">
+                    اعتماد القيمة المحددة
+                </button>
+
+                <button class="conflict-review-reject"
+                        id="rejectConflictChoice">
+                    رفض القيمتين
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("closeConflictReview").onclick = () => {
+        modal.remove();
+    };
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) modal.remove();
+    });
+
+    document.getElementById("saveConflictChoice").onclick = () => {
+        const selected = modal.querySelector(
+            'input[name="conflictSelectedValue"]:checked'
+        );
+
+        if (!selected) {
+            alert("حدد القيمة التي تريد اعتمادها أولاً.");
+            return;
+        }
+
+        saveConflictReview(
+            conflict,
+            "confirm",
+            entries[Number(selected.value)].submittedValue
+        );
+    };
+
+    document.getElementById("rejectConflictChoice").onclick = () => {
+        saveConflictReview(conflict, "reject", null);
+    };
+}
+
+async function saveConflictReview(conflict, action, selectedValue) {
+    const modal = document.getElementById("conflictReviewModal");
+    const reason = modal?.querySelector("#conflictDecisionReason")?.value.trim();
+
+    if (!reason) {
+        alert("اكتب سبب القرار قبل الحفظ.");
+        return;
+    }
+
+    if (!conflict?.id) {
+        alert("معرّف التعارض غير موجود.");
+        return;
+    }
+
+    if (action === "confirm" && selectedValue === undefined) {
+        alert("القيمة المحددة غير موجودة.");
+        return;
+    }
+
+    const buttons = modal.querySelectorAll(
+        "#saveConflictChoice, #rejectConflictChoice"
+    );
+
+    buttons.forEach(button => button.disabled = true);
+
+    try {
+        await api(
+            `/conflicts/${encodeURIComponent(conflict.id)}/decision`,
+            {
+                method: "POST",
+                body: {
+                    action,
+                    selected_value: selectedValue,
+                    reason
+                }
+            }
+        );
+
+        alert("تم حفظ قرار المراجعة بنجاح.");
+
+        modal.remove();
+
+        await refreshAll();
+
+    } catch (error) {
+        alert(error.message || "حدث خطأ أثناء حفظ القرار.");
+
+        buttons.forEach(button => button.disabled = false);
+    }
+}
+
+async function runPipeline(){
+ const btn = document.getElementById("runPipelineBtn");
+ const status = document.getElementById("pipelineStatus");
+ const output = document.getElementById("pipelineOutput");
+
+ if(!btn || !status || !output) return;
+
+ btn.disabled = true;
+ btn.textContent = "جارٍ تنفيذ المعالجة...";
+ status.textContent = "تتم معالجة البيانات...";
+ output.textContent = "بدأت المعالجة...";
+
+ try {
+  const result = await api("/pipeline/run", {method:"POST"});
+  lastPipeline = result;
+
+  const root = result?.result || result?.data || result || {};
+  const patients = Array.isArray(root.patients) ? root.patients : [];
+  const errors = Array.isArray(root.errors) ? root.errors : [];
+
+  const mockPatients = patients.filter(p =>
+   Array.isArray(p?.sources) &&
+   p.sources.includes("mock_hospital_fhir")
+  ).length;
+
+  const patientCount =
+   patients.length || root.patients_count || root.patient_count || "غير متاح";
+
+  const resourceCount =
+   root.fhir_resources_count ??
+   (Array.isArray(root.fhir_resources) ? root.fhir_resources.length : "غير متاح");
+
+  output.textContent = [
+   "حالة المعالجة: " + (root.status || "completed"),
+   "إجمالي المرضى: " + patientCount,
+   "مرضى المستشفى الوهمي: " + mockPatients,
+   "موارد FHIR: " + resourceCount,
+   "عدد الأخطاء: " + errors.length,
+   errors.length ? "الأخطاء:\n" + errors.slice(0,10).join("\n") : "لا توجد أخطاء."
+  ].join("\n");
+
+  status.textContent = "اكتملت المعالجة";
+  document.getElementById("lastRunTime").textContent =
+   new Date().toLocaleString("ar-SA");
+
+  toast("اكتملت عملية المعالجة");
+
+ } catch(e) {
+  output.textContent = "تعذر تنفيذ المعالجة:\n" + (e?.message || String(e));
+  status.textContent = "تعذر إكمال المعالجة";
+  toast("فشلت المعالجة: " + (e?.message || String(e)));
+
+ } finally {
+  btn.disabled = false;
+  btn.textContent = "▶ تشغيل المعالجة الآن";
+ }
+}
+function updateStats(){
+ const h=hospitals.length,p=patients.length,c=conflicts.length;
+ const m=Number(lastPipeline?.matches_count??lastPipeline?.matched_count??lastPipeline?.summary?.matches??0);
+ document.getElementById("statHospitals").textContent=h;
+ document.getElementById("statPatients").textContent=p;
+ document.getElementById("statMatches").textContent=m;
+ document.getElementById("statConflicts").textContent=c;
+ updateReports();
+}
+function updateReports(){
+ const values={
+  reportHospitals:hospitals.length,reportPatients:patients.length,
+  reportMatches:Number(lastPipeline?.matches_count??lastPipeline?.matched_count??lastPipeline?.summary?.matches??0),
+  reportConflicts:conflicts.length
+ };
+ Object.entries(values).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val});
+ const summary=document.getElementById("reportSummary");
+ if(summary)summary.textContent=`المستشفيات المسجلة: ${hospitals.length} — سجلات المرضى المعروضة: ${patients.length} — التعارضات المعروضة: ${conflicts.length}.`;
+}
+function filterTable(inputId,tableId){
+ const q=document.getElementById(inputId).value.toLowerCase();
+ document.querySelectorAll(`#${tableId} tbody tr`).forEach(row=>row.style.display=row.innerText.toLowerCase().includes(q)?"":"none");
+}
+async function refreshAll(){
+ await Promise.allSettled([loadHospitals(),loadPatients(),loadConflicts()]);
+}
+document.getElementById("refreshBtn").addEventListener("click",async()=>{await refreshAll();toast("تم تحديث البيانات المتاحة")});
+
+document.getElementById("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const identity=document.getElementById("loginIdentity").value.trim();
+ const password=document.getElementById("loginPassword").value;
+ try{
+  await api("/login",{method:"POST",body:{identity,password}});
+  document.getElementById("loginScreen").classList.remove("show");
+  toast("تم تسجيل الدخول");refreshAll();
+ }catch(err){toast("تعذر تسجيل الدخول: "+err.message)}
+});
+document.getElementById("logoutBtn").addEventListener("click",async()=>{
+ try{await api("/logout",{method:"POST"})}catch{}
+ document.getElementById("loginScreen").classList.add("show");
+});
+async function checkSession(){
+ try{
+  await api("/me");
+  document.getElementById("loginScreen").classList.remove("show");
+  document.getElementById("connectionText").textContent="تم الاتصال بالخادم";
+  refreshAll();
+ }catch{
+  document.getElementById("loginScreen").classList.add("show");
+  document.getElementById("connectionText").textContent="بانتظار تسجيل الدخول";
+ }
+}
+checkSession();
+</script>
 </body>
 </html>

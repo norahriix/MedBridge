@@ -1,0 +1,11 @@
+
+fields:
+  encounter_id: id
+  patient_id: source_patient_id
+  encounter_type: encounter_type
+  encounter_date: date
+  reason: reason
+  diagnosis: diagnosis
+  location: location
+  encounter_status: status
+  notes: notes

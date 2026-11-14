@@ -1,0 +1,1 @@
+{"resourceType": "Patient", "id": "NDJSON-P001", "name": [{"text": "NDJSON TEST PATIENT"}], "gender": "male", "birthDate": "1985-04-12"}

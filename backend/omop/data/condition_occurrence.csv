@@ -1,0 +1,2 @@
+condition_occurrence_id,person_id,condition_source_value,condition_start_date
+OMOP-C001,OMOP-P001,Hypertension,2020-01-10

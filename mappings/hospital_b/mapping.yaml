@@ -4,3 +4,4 @@ fields:
   fullName: name
   birthDate: birth_date
   gender: gender
+  national_id: national_id
