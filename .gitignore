@@ -23,3 +23,5 @@ backend/core/pipeline_broken_backup.py
 # Temporary files
 *.log
 .DS_Store
+
+*.bak
