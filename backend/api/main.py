@@ -38,6 +38,7 @@ app.add_middleware(
     max_age=3600
 )
 
+# يحتفظ نظام المصادقة بقاعدة بياناته المستقلة كما هو.
 init_db()
 
 API_FOLDER = Path(__file__).resolve().parent
@@ -109,6 +110,27 @@ def init_medbridge_db():
         """)
 
         db.execute("""
+            CREATE TABLE IF NOT EXISTS pipeline_results_by_user (
+                user_id TEXT PRIMARY KEY,
+                result_json TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS conflict_decisions_by_user (
+                user_id TEXT NOT NULL,
+                conflict_id TEXT NOT NULL,
+                patient_id TEXT NOT NULL,
+                action TEXT NOT NULL,
+                selected_value TEXT,
+                reason TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                PRIMARY KEY (user_id, conflict_id)
+            )
+        """)
+
+        db.execute("""
             CREATE TABLE IF NOT EXISTS hospitals (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -122,6 +144,24 @@ def init_medbridge_db():
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
+        """)
+
+        hospital_columns = {
+            row["name"]
+            for row in db.execute("PRAGMA table_info(hospitals)").fetchall()
+        }
+
+        # ترحيل آمن: المستشفيات القديمة تصبح مملوكة للمستخدم الافتراضي
+        # حتى لا تظهر لمستخدم عشوائي بعد إضافة عزل الملكية.
+        if "owner_user_id" not in hospital_columns:
+            db.execute("""
+                ALTER TABLE hospitals
+                ADD COLUMN owner_user_id TEXT NOT NULL DEFAULT ''
+            """)
+
+        db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_hospitals_owner_created
+            ON hospitals(owner_user_id, created_at)
         """)
 
         db.execute("""
@@ -177,68 +217,83 @@ def require_login(request: Request):
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(status_code=401, detail="يجب تسجيل الدخول أولاً")
-    return user_id
+    return str(user_id)
 
 
-def save_pipeline_result(result):
-    result_data = result.model_dump(mode="json")
+def save_pipeline_result(result, user_id):
+    if hasattr(result, "model_dump"):
+        result_data = result.model_dump(mode="json")
+    elif hasattr(result, "dict"):
+        result_data = result.dict()
+    else:
+        result_data = result
+
     result_json = json.dumps(result_data, ensure_ascii=False)
 
     with get_db() as db:
         db.execute("""
-            INSERT INTO pipeline_results (id, result_json, created_at)
-            VALUES (1, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
+            INSERT INTO pipeline_results_by_user
+                (user_id, result_json, created_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
                 result_json = excluded.result_json,
                 created_at = excluded.created_at
-        """, (result_json, datetime.now().isoformat()))
+        """, (
+            user_id,
+            result_json,
+            datetime.now().isoformat()
+        ))
 
     return result_data
 
 
-def get_saved_pipeline():
+def get_saved_pipeline(user_id):
     with get_db() as db:
         row = db.execute("""
-            SELECT result_json, created_at
-            FROM pipeline_results WHERE id = 1
-        """).fetchone()
+            SELECT result_json
+            FROM pipeline_results_by_user
+            WHERE user_id = ?
+        """, (user_id,)).fetchone()
 
     if row is None:
         return None
 
-    result = json.loads(row["result_json"])
-    result["created_at"] = row["created_at"]
-    return result
+    return json.loads(row["result_json"])
 
 
-def get_conflict_decisions():
+def get_conflict_decisions(user_id):
     with get_db() as db:
         rows = db.execute("""
-            SELECT conflict_id, patient_id, user_id, action,
-                   selected_value, reason, created_at
-            FROM conflict_decisions
+            SELECT conflict_id, patient_id, user_id,
+                   action, selected_value, reason, created_at
+            FROM conflict_decisions_by_user
+            WHERE user_id = ?
             ORDER BY created_at DESC
-        """).fetchall()
+        """, (user_id,)).fetchall()
 
     return [dict(row) for row in rows]
 
 
-def get_hospital_or_404(hospital_id):
+def get_hospital_or_404(hospital_id, user_id):
     with get_db() as db:
-        hospital = db.execute(
-            "SELECT * FROM hospitals WHERE id = ?",
-            (hospital_id,)
-        ).fetchone()
+        hospital = db.execute("""
+            SELECT *
+            FROM hospitals
+            WHERE id = ?
+              AND owner_user_id = ?
+        """, (hospital_id, user_id)).fetchone()
 
     if hospital is None:
-        raise HTTPException(status_code=404, detail="المستشفى غير موجود")
+        raise HTTPException(
+            status_code=404,
+            detail="المستشفى غير موجود أو لا تملكين صلاحية الوصول إليه"
+        )
 
-    return dict(hospital)
+    return hospital
 
 
 def hospital_response(hospital):
     result = dict(hospital)
-
     result["mapping"] = json.loads(result.pop("mapping_json", "{}"))
 
     test_json = result.pop("test_json", None)
@@ -265,13 +320,11 @@ def read_uploaded_records(file_path):
     if extension == ".json":
         with file_path.open("r", encoding="utf-8-sig") as file:
             records = json.load(file)
-
     elif extension == ".csv":
         with file_path.open(
             "r", encoding="utf-8-sig", newline=""
         ) as file:
             records = list(csv.DictReader(file))
-
     else:
         raise ValueError("صيغة الملف غير مدعومة")
 
@@ -337,7 +390,7 @@ def logout(request: Request):
 
 @app.post("/pipeline/run")
 def run_pipeline_endpoint(request: Request):
-    require_login(request)
+    user_id = require_login(request)
 
     try:
         result = run_pipeline()
@@ -348,8 +401,8 @@ def run_pipeline_endpoint(request: Request):
                 detail="فشلت المعالجة: " + "; ".join(result.errors)
             )
 
-        result_data = save_pipeline_result(result)
-        result_data["review_decisions"] = get_conflict_decisions()
+        result_data = save_pipeline_result(result, user_id)
+        result_data["review_decisions"] = get_conflict_decisions(user_id)
         return result_data
 
     except HTTPException:
@@ -363,40 +416,37 @@ def run_pipeline_endpoint(request: Request):
 
 @app.get("/pipeline/latest")
 def latest_pipeline_endpoint(request: Request):
-    require_login(request)
+    user_id = require_login(request)
+    result = get_saved_pipeline(user_id)
 
-    result = get_saved_pipeline()
     if result is None:
         raise HTTPException(
             status_code=404,
             detail="لا توجد نتائج معالجة محفوظة"
         )
 
-    result["review_decisions"] = get_conflict_decisions()
+    result["review_decisions"] = get_conflict_decisions(user_id)
     return result
 
 
 @app.get("/conflicts")
 def list_conflicts(request: Request):
-    require_login(request)
+    user_id = require_login(request)
+    result = get_saved_pipeline(user_id)
 
-    result = get_saved_pipeline()
     if result is None:
         return []
 
     decisions = {
         item["conflict_id"]: item
-        for item in get_conflict_decisions()
+        for item in get_conflict_decisions(user_id)
     }
 
     patients_result = result.get("patients", [])
     patient_names = {}
 
     for patient in patients_result:
-        patient_id = (
-            patient.get("id")
-            or patient.get("patient_id")
-        )
+        patient_id = patient.get("id") or patient.get("patient_id")
         if patient_id:
             patient_names[str(patient_id)] = (
                 patient.get("name")
@@ -405,24 +455,23 @@ def list_conflicts(request: Request):
                 or ""
             )
 
-    conflicts = result.get("conflicts", [])
-
     output = []
-    for conflict in conflicts:
-        item = dict(conflict)
+    for conflict in result.get("conflicts", []):
+        conflict_id = conflict.get("id")
+        if conflict_id in decisions:
+            continue
 
+        item = dict(conflict)
         patient_id = str(item.get("patient_id") or "")
         item["patient_name"] = (
             item.get("patient_name")
             or patient_names.get(patient_id)
             or ""
         )
-
-        item["decision"] = decisions.get(item.get("id"))
+        item["decision"] = None
         output.append(item)
 
     return output
-
 
 
 @app.post("/conflicts/{conflict_id}/decision")
@@ -434,9 +483,12 @@ def save_conflict_decision(
     user_id = require_login(request)
 
     if not data.reason.strip():
-        raise HTTPException(status_code=400, detail="يجب كتابة سبب القرار")
+        raise HTTPException(
+            status_code=400,
+            detail="يجب كتابة سبب القرار"
+        )
 
-    result = get_saved_pipeline()
+    result = get_saved_pipeline(user_id)
     if result is None:
         raise HTTPException(status_code=404, detail="لا توجد نتائج معالجة")
 
@@ -447,12 +499,10 @@ def save_conflict_decision(
         ),
         None
     )
-
     if conflict is None:
         raise HTTPException(status_code=404, detail="التعارض غير موجود")
 
     selected_value = data.selected_value
-
     if data.action == "confirm":
         if selected_value is None:
             raise HTTPException(
@@ -463,8 +513,7 @@ def save_conflict_decision(
         available_values = [
             str(value) for value in conflict.get("values", [])
         ]
-
-        if selected_value not in available_values:
+        if str(selected_value) not in available_values:
             raise HTTPException(
                 status_code=400,
                 detail="القيمة المختارة ليست من القيم المسجلة"
@@ -473,25 +522,23 @@ def save_conflict_decision(
         selected_value = None
 
     created_at = datetime.now().isoformat()
-
     with get_db() as db:
         db.execute("""
-            INSERT INTO conflict_decisions (
-                conflict_id, patient_id, user_id, action,
+            INSERT INTO conflict_decisions_by_user (
+                user_id, conflict_id, patient_id, action,
                 selected_value, reason, created_at
             )
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(conflict_id) DO UPDATE SET
+            ON CONFLICT(user_id, conflict_id) DO UPDATE SET
                 patient_id = excluded.patient_id,
-                user_id = excluded.user_id,
                 action = excluded.action,
                 selected_value = excluded.selected_value,
                 reason = excluded.reason,
                 created_at = excluded.created_at
         """, (
-            conflict_id,
-            conflict.get("patient_id", ""),
             user_id,
+            conflict_id,
+            str(conflict.get("patient_id") or ""),
             data.action,
             selected_value,
             data.reason.strip(),
@@ -510,8 +557,7 @@ def save_conflict_decision(
 
 @app.post("/hospitals")
 def create_hospital(data: HospitalCreateData, request: Request):
-    require_login(request)
-
+    user_id = require_login(request)
     hospital_id = str(uuid.uuid4())
     now = datetime.now().isoformat()
     code = (data.code or f"MB-{uuid.uuid4().hex[:8]}").strip().upper()
@@ -520,12 +566,13 @@ def create_hospital(data: HospitalCreateData, request: Request):
         try:
             db.execute("""
                 INSERT INTO hospitals (
-                    id, name, code, city, system_name, data_format,
-                    status, mapping_json, created_at, updated_at
+                    id, owner_user_id, name, code, city, system_name,
+                    data_format, status, mapping_json, created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, 'draft', '{}', ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', '{}', ?, ?)
             """, (
                 hospital_id,
+                user_id,
                 data.name.strip(),
                 code,
                 data.city.strip(),
@@ -541,8 +588,7 @@ def create_hospital(data: HospitalCreateData, request: Request):
             )
 
     (UPLOAD_FOLDER / hospital_id).mkdir(parents=True, exist_ok=True)
-
-    hospital = get_hospital_or_404(hospital_id)
+    hospital = get_hospital_or_404(hospital_id, user_id)
     result = hospital_response(hospital)
     result["files"] = []
     return result
@@ -550,16 +596,19 @@ def create_hospital(data: HospitalCreateData, request: Request):
 
 @app.get("/hospitals")
 def list_hospitals(request: Request):
-    require_login(request)
+    user_id = require_login(request)
 
     with get_db() as db:
         rows = db.execute("""
-            SELECT * FROM hospitals ORDER BY created_at DESC
-        """).fetchall()
+            SELECT *
+            FROM hospitals
+            WHERE owner_user_id = ?
+            ORDER BY created_at DESC
+        """, (user_id,)).fetchall()
 
     result = []
     for row in rows:
-        item = hospital_response(dict(row))
+        item = hospital_response(row)
         item["files"] = get_hospital_files(item["id"])
         result.append(item)
 
@@ -568,9 +617,8 @@ def list_hospitals(request: Request):
 
 @app.get("/hospitals/{hospital_id}")
 def get_hospital_details(hospital_id: str, request: Request):
-    require_login(request)
-
-    hospital = hospital_response(get_hospital_or_404(hospital_id))
+    user_id = require_login(request)
+    hospital = hospital_response(get_hospital_or_404(hospital_id, user_id))
     hospital["files"] = get_hospital_files(hospital_id)
     return hospital
 
@@ -581,10 +629,14 @@ def update_hospital(
     data: HospitalUpdateData,
     request: Request
 ):
-    require_login(request)
-    get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    get_hospital_or_404(hospital_id, user_id)
 
-    updates = data.model_dump(exclude_unset=True)
+    if hasattr(data, "model_dump"):
+        updates = data.model_dump(exclude_unset=True)
+    else:
+        updates = data.dict(exclude_unset=True)
+
     if not updates:
         raise HTTPException(status_code=400, detail="لا توجد بيانات للتعديل")
 
@@ -596,17 +648,18 @@ def update_hospital(
             updates[key] = value.strip()
 
     updates["updated_at"] = datetime.now().isoformat()
-
     assignments = ", ".join(f"{key} = ?" for key in updates)
-    values = list(updates.values()) + [hospital_id]
+    values = list(updates.values()) + [hospital_id, user_id]
 
     with get_db() as db:
         db.execute(
-            f"UPDATE hospitals SET {assignments} WHERE id = ?",
+            f"""UPDATE hospitals
+                SET {assignments}
+                WHERE id = ? AND owner_user_id = ?""",
             values
         )
 
-    hospital = hospital_response(get_hospital_or_404(hospital_id))
+    hospital = hospital_response(get_hospital_or_404(hospital_id, user_id))
     hospital["files"] = get_hospital_files(hospital_id)
     return hospital
 
@@ -617,8 +670,8 @@ async def upload_hospital_file(
     request: Request,
     file: UploadFile = File(...)
 ):
-    require_login(request)
-    get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    get_hospital_or_404(hospital_id, user_id)
 
     original_name = Path(file.filename or "uploaded_file").name
     extension = Path(original_name).suffix.lower()
@@ -663,23 +716,28 @@ async def upload_hospital_file(
     file_id = str(uuid.uuid4())
     now = datetime.now().isoformat()
 
-    with get_db() as db:
-        db.execute("""
-            INSERT INTO hospital_files (
-                id, hospital_id, original_name, stored_name,
-                file_type, file_size, uploaded_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            file_id, hospital_id, original_name, stored_name,
-            extension.replace(".", "").upper(), len(content), now
-        ))
+    try:
+        with get_db() as db:
+            db.execute("""
+                INSERT INTO hospital_files (
+                    id, hospital_id, original_name, stored_name,
+                    file_type, file_size, uploaded_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                file_id, hospital_id, original_name, stored_name,
+                extension.replace(".", "").upper(), len(content), now
+            ))
 
-        db.execute("""
-            UPDATE hospitals
-            SET status = 'draft', test_json = NULL, updated_at = ?
-            WHERE id = ?
-        """, (now, hospital_id))
+            db.execute("""
+                UPDATE hospitals
+                SET status = 'draft', test_json = NULL, updated_at = ?
+                WHERE id = ? AND owner_user_id = ?
+            """, (now, hospital_id, user_id))
+    except Exception:
+        if file_path.exists():
+            file_path.unlink()
+        raise
 
     return {
         "status": "uploaded",
@@ -692,12 +750,13 @@ async def upload_hospital_file(
 
 @app.post("/hospitals/{hospital_id}/analyze")
 def analyze_hospital_files(hospital_id: str, request: Request):
-    require_login(request)
-    get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    get_hospital_or_404(hospital_id, user_id)
 
     with get_db() as db:
         files = db.execute("""
-            SELECT * FROM hospital_files
+            SELECT *
+            FROM hospital_files
             WHERE hospital_id = ?
             ORDER BY uploaded_at DESC
         """, (hospital_id,)).fetchall()
@@ -709,14 +768,11 @@ def analyze_hospital_files(hospital_id: str, request: Request):
         )
 
     analyzed_files = []
-
     for item in files:
         file_path = UPLOAD_FOLDER / hospital_id / item["stored_name"]
-
         try:
             records = read_uploaded_records(file_path)
             columns = list(records[0].keys()) if records else []
-
             analyzed_files.append({
                 "file_id": item["id"],
                 "file_name": item["original_name"],
@@ -744,11 +800,10 @@ def save_hospital_mapping(
     data: HospitalMappingData,
     request: Request
 ):
-    require_login(request)
-    get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    get_hospital_or_404(hospital_id, user_id)
 
     mapping = data.mapping
-
     invalid_fields = [
         field for field in mapping if field not in CANONICAL_FIELDS
     ]
@@ -765,17 +820,17 @@ def save_hospital_mapping(
         )
 
     now = datetime.now().isoformat()
-
     with get_db() as db:
         db.execute("""
             UPDATE hospitals
             SET mapping_json = ?, status = 'draft',
                 test_json = NULL, updated_at = ?
-            WHERE id = ?
+            WHERE id = ? AND owner_user_id = ?
         """, (
             json.dumps(mapping, ensure_ascii=False),
             now,
-            hospital_id
+            hospital_id,
+            user_id
         ))
 
     return {"status": "saved", "mapping": mapping}
@@ -783,14 +838,12 @@ def save_hospital_mapping(
 
 @app.post("/hospitals/{hospital_id}/test")
 def test_hospital(hospital_id: str, request: Request):
-    require_login(request)
-
-    hospital = get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    hospital = get_hospital_or_404(hospital_id, user_id)
     mapping = json.loads(hospital["mapping_json"])
 
     errors = []
     warnings = []
-
     required_fields = [
         "source_patient_id", "name", "birth_date", "gender"
     ]
@@ -801,7 +854,8 @@ def test_hospital(hospital_id: str, request: Request):
 
     with get_db() as db:
         files = db.execute("""
-            SELECT * FROM hospital_files
+            SELECT *
+            FROM hospital_files
             WHERE hospital_id = ?
             ORDER BY uploaded_at DESC
         """, (hospital_id,)).fetchall()
@@ -815,10 +869,8 @@ def test_hospital(hospital_id: str, request: Request):
     if not errors:
         for item in files:
             file_path = UPLOAD_FOLDER / hospital_id / item["stored_name"]
-
             try:
                 records = read_uploaded_records(file_path)
-
                 for index, record in enumerate(records, start=1):
                     tested_records += 1
                     record_errors = []
@@ -826,17 +878,16 @@ def test_hospital(hospital_id: str, request: Request):
                     for canonical_field in required_fields:
                         source_field = mapping.get(canonical_field)
                         value = record.get(source_field)
-
                         if value is None or str(value).strip() == "":
                             record_errors.append(
-                                f"السجل {index}: الحقل {canonical_field} فارغ"
+                                f"السجل {index}: الحقل "
+                                f"{canonical_field} فارغ"
                             )
 
                     if record_errors:
                         errors.extend(record_errors[:20])
                     else:
                         valid_records += 1
-
             except Exception as error:
                 errors.append(
                     f"تعذر اختبار {item['original_name']}: {str(error)}"
@@ -864,12 +915,13 @@ def test_hospital(hospital_id: str, request: Request):
         db.execute("""
             UPDATE hospitals
             SET test_json = ?, status = ?, updated_at = ?
-            WHERE id = ?
+            WHERE id = ? AND owner_user_id = ?
         """, (
             json.dumps(test_result, ensure_ascii=False),
             "tested" if passed else "draft",
             datetime.now().isoformat(),
-            hospital_id
+            hospital_id,
+            user_id
         ))
 
     return test_result
@@ -877,9 +929,8 @@ def test_hospital(hospital_id: str, request: Request):
 
 @app.post("/hospitals/{hospital_id}/activate")
 def activate_hospital(hospital_id: str, request: Request):
-    require_login(request)
-
-    hospital = get_hospital_or_404(hospital_id)
+    user_id = require_login(request)
+    hospital = get_hospital_or_404(hospital_id, user_id)
 
     if not hospital["test_json"]:
         raise HTTPException(
@@ -888,7 +939,6 @@ def activate_hospital(hospital_id: str, request: Request):
         )
 
     test_result = json.loads(hospital["test_json"])
-
     if not test_result.get("passed"):
         raise HTTPException(
             status_code=400,
@@ -896,13 +946,12 @@ def activate_hospital(hospital_id: str, request: Request):
         )
 
     now = datetime.now().isoformat()
-
     with get_db() as db:
         db.execute("""
             UPDATE hospitals
             SET status = 'configured', updated_at = ?
-            WHERE id = ?
-        """, (now, hospital_id))
+            WHERE id = ? AND owner_user_id = ?
+        """, (now, hospital_id, user_id))
 
     return {
         "status": "configured",

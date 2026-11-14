@@ -1086,20 +1086,39 @@ async function uploadHospitalFile(){
 async function analyzeHospital(){
  const target=document.getElementById("analysisResult");
  target.innerHTML='<div class="notice">جارٍ تحليل ملف المستشفى...</div>';
+
  try{
   const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/analyze`,{method:"POST"});
-  let columns=data.columns||data.detected_columns||data.fields||data.source_fields||[];
-  if(!Array.isArray(columns)&&columns&&typeof columns==="object")columns=Object.keys(columns);
-  detectedColumns=columns.map(x=>typeof x==="string"?x:(x.name??x.field??String(x)));
-  if(!detectedColumns.length&&Array.isArray(data.records)&&data.records[0])detectedColumns=Object.keys(data.records[0]);
+
+  const files=Array.isArray(data.files)?data.files:[];
+  const successfulFiles=files.filter(f=>Array.isArray(f.columns));
+
+  detectedColumns=[...new Set(successfulFiles.flatMap(f=>f.columns))];
+
+  const suggestedMapping=successfulFiles[0]?.suggested_mapping||{};
+  currentMapping={...suggestedMapping,...currentMapping};
+
   const resultFields=[
-   ["source_patient_id","معرّف المريض في المصدر"],["national_id","رقم الهوية الوطنية"],
-   ["name","اسم المريض"],["birth_date","تاريخ الميلاد"],["gender","الجنس"]
+   ["source_patient_id","معرّف المريض في المصدر"],
+   ["national_id","رقم الهوية الوطنية"],
+   ["name","اسم المريض"],
+   ["birth_date","تاريخ الميلاد"],
+   ["gender","الجنس"]
   ];
-  document.getElementById("mappingFields").innerHTML=renderMappingFields(resultFields,currentMapping);
-  target.innerHTML=`<div class="notice">اكتمل تحليل الملف. تم التعرف على ${detectedColumns.length} عمودًا.</div>
-   <div style="display:flex;gap:7px;flex-wrap:wrap">${detectedColumns.map(c=>`<span class="status off">${safe(c)}</span>`).join("")||"لم يتم العثور على أعمدة"}</div>`;
+
+  document.getElementById("mappingFields").innerHTML=
+   renderMappingFields(resultFields,currentMapping);
+
+  target.innerHTML=`
+   <div class="notice">اكتمل تحليل الملف. تم التعرف على ${detectedColumns.length} عمودًا.</div>
+   <div style="display:flex;gap:7px;flex-wrap:wrap">
+    ${detectedColumns.map(c=>`<span class="status off">${safe(c)}</span>`).join("")||"لم يتم العثور على أعمدة"}
+   </div>
+   ${files.filter(f=>f.error).map(f=>`<div class="notice warning">${safe(f.file_name)}: ${safe(f.error)}</div>`).join("")}
+  `;
+
   toast("اكتمل تحليل الملف");
+
  }catch(e){
   target.innerHTML='<div class="notice warning">تعذر تحليل الملف: '+safe(e.message)+'</div>';
   toast("فشل تحليل الملف: "+e.message);
@@ -1809,6 +1828,13 @@ async function saveConflictReview(conflict, action, selectedValue) {
             }
         );
 
+        // إخفاء التعارض المعالج من القائمة الحالية
+        if (Array.isArray(window.conflicts)) {
+            window.conflicts = window.conflicts.filter(
+                item => String(item.id) !== String(conflict.id)
+            );
+        }
+
         alert("تم حفظ قرار المراجعة بنجاح.");
 
         modal.remove();
@@ -1817,11 +1843,9 @@ async function saveConflictReview(conflict, action, selectedValue) {
 
     } catch (error) {
         alert(error.message || "حدث خطأ أثناء حفظ القرار.");
-
         buttons.forEach(button => button.disabled = false);
     }
 }
-
 async function runPipeline(){
  const btn = document.getElementById("runPipelineBtn");
  const status = document.getElementById("pipelineStatus");
