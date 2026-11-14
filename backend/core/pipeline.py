@@ -259,6 +259,7 @@ def process_observations(
 
 
 # 6. Collect Source Records
+
 def collect_source_records():
 
     configuration = load_yaml(
@@ -271,7 +272,12 @@ def collect_source_records():
     clinical_types = {
         "medications": "medication_mapping",
         "allergies": "allergy_mapping",
-        "diagnoses": "diagnosis_mapping"
+        "diagnoses": "diagnosis_mapping",
+        "procedures": "procedure_mapping",
+        "medical_history": "medical_history_mapping",
+        "encounters": "encounter_mapping",
+        "immunizations": "immunization_mapping",
+        "family_history": "family_history_mapping"
     }
 
     for settings in configuration["sources"]:
@@ -284,32 +290,25 @@ def collect_source_records():
         )
 
         patients = build_patients(results, source)
-
         all_patients.extend(patients)
 
         for result in results:
-
             all_source_records.append(
                 SourceRecord(**result)
             )
 
         if "observations" in settings:
-
             observation_records = process_observations(
                 ROOT / settings["observations"],
                 ROOT / settings["observation_mapping"],
                 source,
                 patients
             )
+            all_source_records.extend(observation_records)
 
-            all_source_records.extend(
-                observation_records
-            )
-
-        # Process medications, allergies and diagnoses
         for record_type, mapping_key in clinical_types.items():
 
-            if record_type in settings:
+            if record_type in settings and mapping_key in settings:
 
                 clinical_records = process_clinical_records(
                     ROOT / settings[record_type],
@@ -319,20 +318,15 @@ def collect_source_records():
                     record_type
                 )
 
-                all_source_records.extend(
-                    clinical_records
-                )
+                all_source_records.extend(clinical_records)
 
-    # Connect to the synthetic Mock Hospital FHIR server
     try:
-
         mock_patients, mock_records = fetch_fhir_data()
 
         all_patients.extend(mock_patients)
         all_source_records.extend(mock_records)
 
     except Exception as error:
-
         all_source_records.append(
             SourceRecord(
                 source="mock_hospital_fhir",
@@ -340,9 +334,7 @@ def collect_source_records():
                 mapped={},
                 normalized={},
                 provenance=[],
-                errors=[
-                    f"FHIR connection failed: {error}"
-                ]
+                errors=[f"FHIR connection failed: {error}"]
             )
         )
 
@@ -351,18 +343,12 @@ def collect_source_records():
 
 # 7. Identity Matching
 def run_identity_matching():
-
     patients, source_records = collect_source_records()
-
-    # Do not match synthetic Mock Hospital patients
     matches = match_patients([
-        patient
-        for patient in patients
-        if "mock_hospital_fhir" not in patient.sources
-    ])
-
+    patient for patient in patients
+    if "mock_hospital_fhir" not in patient.sources
+])
     return patients, matches
-
 
 # 8. Conflict Detection and Resolution
 def process_conflicts(patients: list[Patient]):
@@ -511,24 +497,21 @@ def export_fhir(patients: list[Patient], conflicts):
 
 
 # 10. Main Pipeline
+
 def run_pipeline() -> PipelineResult:
 
     run_id = str(uuid4())
 
     try:
-
         patients, source_records = collect_source_records()
 
-        # Do not match synthetic Mock Hospital patients
         matches = match_patients([
             patient
             for patient in patients
             if "mock_hospital_fhir" not in patient.sources
         ])
 
-        conflicts, resolutions = process_conflicts(
-            patients
-        )
+        conflicts, resolutions = process_conflicts(patients)
 
         fhir_resources = export_fhir(patients, conflicts)
 
@@ -551,9 +534,9 @@ def run_pipeline() -> PipelineResult:
         )
 
     except Exception as error:
-
         return PipelineResult(
             run_id=run_id,
             status="failed",
             errors=[str(error)]
         )
+
