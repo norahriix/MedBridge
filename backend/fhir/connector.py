@@ -3,6 +3,7 @@ from datetime import date
 from uuid import uuid5, NAMESPACE_URL
 
 import httpx
+from provenance.tracker import track_provenance
 
 from canonical.models import (
     Patient,
@@ -123,14 +124,23 @@ def _get_national_id(resource):
 def _get_status(resource, default="unknown"):
     return resource.get("status") or default
 
-
+def _build_fhir_provenance(resource):
+    return [
+        track_provenance(
+            source=SOURCE,
+            original_field=field,
+            original_value=value,
+            transformations=[]
+        )
+        for field, value in resource.items()
+    ]
 def _make_source_record(resource, mapped, normalized, errors=None):
     return SourceRecord(
         source=SOURCE,
         original=resource,
         mapped=mapped,
         normalized=normalized,
-        provenance=[],
+        provenance=_build_fhir_provenance(resource),
         errors=errors or [],
     )
 
@@ -319,7 +329,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                     unit=reading["unit"],
                     date=observation_date,
                     source=SOURCE,
-                    provenance=[],
+                    provenance=_build_fhir_provenance(resource),
                 )
             )
 
@@ -391,7 +401,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 code=code,
                 description=description,
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -405,7 +415,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 status=status,
                 notes=None,
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -465,7 +475,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 reaction=reaction,
                 status=_get_status(resource),
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -537,7 +547,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 dose=dose,
                 status=_get_status(resource),
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -612,7 +622,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 status=_get_status(resource),
                 notes=None,
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -674,7 +684,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 outcome=None,
                 notes=None,
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -733,7 +743,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 dose=str(dose) if dose is not None else None,
                 status=_get_status(resource),
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
@@ -800,7 +810,7 @@ def fetch_fhir_data(base_url="http://127.0.0.1:8001"):
                 relationship=relationship,
                 notes=notes,
                 source=SOURCE,
-                provenance=[],
+                provenance=_build_fhir_provenance(resource),
             )
         )
 
