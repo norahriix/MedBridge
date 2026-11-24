@@ -73,9 +73,10 @@ They do not establish clinical accuracy or production readiness.
 - Full OMOP vocabulary validation remains untested.
 - DICOM validation covers metadata only.
 - Identity matching was evaluated using a small synthetic fixture.
-- Previous FHIR conversion benchmarks covered 1,000, 5,000 and 10,000 patients.
+- FHIR conversion benchmarks were revalidated at 1,000, 5,000 and 10,000 synthetic patients, with zero recorded conversion errors.
+- Updated FHIR benchmarks use simulated HTTP responses and measure connector conversion, not full pipeline performance.
 - Previous local concurrent API tests covered 5, 10 and 20 requests.
-- The historical performance results have not been revalidated after the latest bug fixes.
+- Historical sequential and concurrent API load tests have not been revalidated after the latest bug fixes.
 - Production-scale performance, full security validation and long-duration stability remain untested.
 
 ## 6. Conclusion
@@ -88,7 +89,7 @@ Historical benchmarks demonstrate preliminary technical feasibility, not product
 
 Further testing is required to establish full standards compliance, real-world identity matching accuracy, security and production scalability.
 
-## FHIR PERFORMANCE BENCHMARK
+## Historical FHIR Performance Benchmark
 
 | Patients | Source Records | Mapped Observations | Conversion Time | Throughput | Peak Memory | Errors |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -104,6 +105,48 @@ LIMITATIONS:
 - Memory reports Python tracemalloc peak during conversion.
 - Production-scale database and load testing remain pending.
 
+## Updated FHIR Performance Benchmark
+
+The updated benchmark was executed using synthetic data
+and the current FHIR connector implementation.
+
+| Patients | Source Records | Observations | Conversion Time | Throughput | Peak Memory (MB) | Errors |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,000 | 12,000 | 5,000 | 3.601 sec | 277.70 | 135.16 | 0 |
+| 5,000 | 60,000 | 25,000 | 19.211 sec | 260.27 | 675.74 | 0 |
+| 10,000 | 120,000 | 50,000 | 40.283 sec | 248.24 | 1351.51 | 0 |
+
+All requested patients were successfully mapped.
+
+Conversion time and measured memory increased approximately
+linearly across the tested dataset sizes.
+
+The benchmark uses simulated HTTP responses and covers
+FHIR connector conversion rather than the full pipeline.
+
+Memory values represent Python tracemalloc peak allocations
+during conversion, not total system memory usage.
+
+The updated results are not directly comparable with the
+historical benchmark because the dataset structure, resource
+coverage, and provenance tracking have changed.
+
+Results file: FHIR_PERFORMANCE_BENCHMARK_UPDATED.csv
+
+## Updated Automated Regression Tests
+
+- Total tests: 32
+- Passed: 32
+- Failed: 0
+- Pass rate: 100%
+- Execution time: 30.74 seconds
+
+The tests cover ingestion, identity matching, patient merging,
+clinical records, conflict detection, resolution, provenance,
+FHIR export, references, review flags, and stable identifiers.
+
+These results apply only to the tested synthetic datasets
+and do not establish clinical or production readiness.
 
 ## Pipeline Repeated Execution Stability Test
 

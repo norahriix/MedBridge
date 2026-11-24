@@ -144,11 +144,26 @@ The project includes technical tests using synthetic datasets.
 
 | Patients | Source Records | Conversion Time | Throughput |
 |---:|---:|---:|---:|
-| 1,000 | 3,000 | 0.482 sec | 2,073.65 patients/sec |
-| 5,000 | 15,000 | 2.190 sec | 2,283.10 patients/sec |
-| 10,000 | 30,000 | 4.674 sec | 2,139.30 patients/sec |
+| 1,000 | 12,000 | 3.601 sec | 277.70 patients/sec |
+| 5,000 | 60,000 | 19.211 sec | 260.27 patients/sec |
+| 10,000 | 120,000 | 40.283 sec | 248.24 patients/sec |
 
-These historical measurements cover FHIR connector conversion, not the complete end-to-end pipeline. They have not yet been revalidated after the latest bug fixes.
+All requested patients were mapped successfully,
+with zero recorded conversion errors.
+
+These measurements use synthetic data and simulated
+HTTP responses. They cover FHIR connector conversion,
+not the complete end-to-end pipeline.
+
+### Automated Regression Tests
+
+- Total tests: 32
+- Passed: 32
+- Failed: 0
+- Pass rate: 100%
+
+Results apply to the current synthetic test suite.
+They do not establish production or clinical accuracy.
 
 ### Identity Matching Test
 
