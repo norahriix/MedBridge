@@ -1887,11 +1887,17 @@ async function runPipeline(){
    errors.length ? "الأخطاء:\n" + errors.slice(0,10).join("\n") : "لا توجد أخطاء."
   ].join("\n");
 
-  status.textContent = "اكتملت المعالجة";
+  
+   const completionMessage = errors.length > 0
+   ? "اكتملت المعالجة مع وجود أخطاء"
+   : "اكتملت المعالجة بنجاح";
+
+  status.textContent = completionMessage;
+
   document.getElementById("lastRunTime").textContent =
    new Date().toLocaleString("ar-SA");
 
-  toast("اكتملت عملية المعالجة");
+  toast(completionMessage);
 
  } catch(e) {
   output.textContent = "تعذر تنفيذ المعالجة:\n" + (e?.message || String(e));
