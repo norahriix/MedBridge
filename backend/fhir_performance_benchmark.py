@@ -1,4 +1,3 @@
-
 import csv
 import gc
 import time
@@ -35,41 +34,50 @@ class FakeClient:
         pass
 
     def get(self, url):
-        if url.endswith("/Patient"):
-            return FakeResponse(CURRENT_BUNDLES["Patient"])
-        if url.endswith("/Observation"):
-            return FakeResponse(CURRENT_BUNDLES["Observation"])
+        resource_type = url.rsplit("/", 1)[-1]
+
+        if resource_type in CURRENT_BUNDLES:
+            return FakeResponse(
+                CURRENT_BUNDLES[resource_type]
+            )
+
         raise ValueError(f"Unexpected URL: {url}")
 
 
 def make_bundle(resources):
     return {
         "resourceType": "Bundle",
-        "entry": [{"resource": item} for item in resources]
+        "entry": [
+            {"resource": item}
+            for item in resources
+        ]
     }
 
 
 def build_data(count):
     patients = []
-    observations = []
 
-    for index in range(1, count + 1):
-        patient = hospital.generate_patient(index)
-        patient_id = patient["id"]
-        patients.append(patient)
+    resources = {
+        resource_type: {}
+        for resource_type in connector.RESOURCE_TYPES
+        if resource_type != "Patient"
+    }
 
-        observations.append(
-            hospital.generate_weight_observation(index, patient_id)
-        )
-        observations.append(
-            hospital.generate_blood_pressure_observation(
-                index, patient_id
+    with patch.object(hospital, "RESOURCES", resources):
+        for index in range(1, count + 1):
+            patient = hospital.generate_patient(index)
+            patients.append(patient)
+
+            hospital.generate_patient_resources(
+                index, patient["id"]
             )
-        )
 
     return {
         "Patient": make_bundle(patients),
-        "Observation": make_bundle(observations)
+        **{
+            resource_type: make_bundle(list(items.values()))
+            for resource_type, items in resources.items()
+        }
     }
 
 
@@ -82,33 +90,45 @@ def run_benchmark():
         gc.collect()
 
         generation_start = time.perf_counter()
+
         CURRENT_BUNDLES.clear()
         CURRENT_BUNDLES.update(build_data(size))
-        generation_time = time.perf_counter() - generation_start
+
+        generation_time = (
+            time.perf_counter() - generation_start
+        )
 
         tracemalloc.start()
         start = time.perf_counter()
 
         try:
-            with patch.object(connector.httpx, "Client", FakeClient):
+            with patch.object(
+                connector.httpx, "Client", FakeClient
+            ):
                 patients, records = connector.fetch_fhir_data()
 
             elapsed = time.perf_counter() - start
-            current_memory, peak_memory = tracemalloc.get_traced_memory()
+
+            current_memory, peak_memory = (
+                tracemalloc.get_traced_memory()
+            )
 
         finally:
             tracemalloc.stop()
 
         mapped_observations = sum(
-            len(patient.observations) for patient in patients
+            len(patient.observations)
+            for patient in patients
         )
 
         errors = sum(
-            len(record.errors) for record in records
+            len(record.errors)
+            for record in records
         )
 
         throughput = (
-            len(patients) / elapsed if elapsed > 0 else 0
+            len(patients) / elapsed
+            if elapsed > 0 else 0
         )
 
         result = {
@@ -119,13 +139,16 @@ def run_benchmark():
             "generation_seconds": round(generation_time, 3),
             "conversion_seconds": round(elapsed, 3),
             "patients_per_second": round(throughput, 2),
-            "peak_memory_mb": round(peak_memory / (1024 * 1024), 2),
+            "peak_memory_mb": round(
+                peak_memory / (1024 * 1024), 2
+            ),
             "errors": errors
         }
 
         results.append(result)
 
         print("\n--------------------------------")
+
         for key, value in result.items():
             print(f"{key}: {value}")
 
@@ -133,20 +156,22 @@ def run_benchmark():
         gc.collect()
 
     with open(
-        "FHIR_PERFORMANCE_BENCHMARK.csv",
+        "FHIR_PERFORMANCE_BENCHMARK_UPDATED.csv",
         "w",
         newline="",
         encoding="utf-8-sig"
     ) as file:
+
         writer = csv.DictWriter(
             file,
             fieldnames=results[0].keys()
         )
+
         writer.writeheader()
         writer.writerows(results)
 
     print("\n===== BENCHMARK COMPLETED =====")
-    print("REPORT: FHIR_PERFORMANCE_BENCHMARK.csv")
+    print("REPORT: FHIR_PERFORMANCE_BENCHMARK_UPDATED.csv")
 
 
 if __name__ == "__main__":
