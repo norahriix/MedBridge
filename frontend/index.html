@@ -1897,6 +1897,8 @@ async function runPipeline(){
   document.getElementById("lastRunTime").textContent =
    new Date().toLocaleString("ar-SA");
 
+  await refreshAll();
+
   toast(completionMessage);
 
  } catch(e) {
