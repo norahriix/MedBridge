@@ -634,8 +634,8 @@ tbody tr:hover{background:#fbfdfd}
   </div>
  </div>
 
- <div class="stats">
-  <div class="stat-card"><div class="stat-top"><span class="stat-label">المستشفيات المسجلة</span><span class="stat-icon icon-teal">⌂</span></div><div class="stat-number" id="statHospitals">0</div><div class="stat-foot">إجمالي الجهات المسجلة</div></div>
+  <div class="stats">
+  <div class="stat-card"><div class="stat-top"><span class="stat-label">المستشفيات المسجلة</span><span class="stat-icon icon-teal">⌂</span></div><div class="stat-number" id="statHospitals">0</div><div class="stat-foot">إجمالي المستشفيات المسجلة في حسابك</div></div>
   <div class="stat-card"><div class="stat-top"><span class="stat-label">سجلات المرضى</span><span class="stat-icon icon-blue">♙</span></div><div class="stat-number" id="statPatients">0</div><div class="stat-foot">السجلات المعالجة أو المستوردة</div></div>
   <div class="stat-card"><div class="stat-top"><span class="stat-label">المطابقات الناجحة</span><span class="stat-icon icon-orange">✓</span></div><div class="stat-number" id="statMatches">0</div><div class="stat-foot">نتائج المطابقة المسجلة</div></div>
   <div class="stat-card"><div class="stat-top"><span class="stat-label">التعارضات</span><span class="stat-icon icon-red">!</span></div><div class="stat-number" id="statConflicts">0</div><div class="stat-foot">تحتاج إلى مراجعة</div></div>
@@ -732,7 +732,7 @@ tbody tr:hover{background:#fbfdfd}
 <section class="page" id="page-reports">
  <div class="page-heading"><div><h1>التقارير والإحصائيات</h1><p>نظرة عامة على مؤشرات البيانات وعمليات المنصة.</p></div><button class="btn btn-outline" onclick="refreshAll()">↻ تحديث المؤشرات</button></div>
  <div class="stats">
-  <div class="stat-card"><div class="stat-label">المستشفيات</div><div class="stat-number" id="reportHospitals">0</div></div>
+  <div class="stat-card"><div class="stat-label">المستشفيات المسجلة</div><div class="stat-number" id="reportHospitals">0</div></div>
   <div class="stat-card"><div class="stat-label">المرضى</div><div class="stat-number" id="reportPatients">0</div></div>
   <div class="stat-card"><div class="stat-label">المطابقات</div><div class="stat-number" id="reportMatches">0</div></div>
   <div class="stat-card"><div class="stat-label">التعارضات</div><div class="stat-number" id="reportConflicts">0</div></div>
@@ -1013,7 +1013,7 @@ function renderHospitalDetails(h){
  <div class="panel">
   <div class="panel-head"><h3>4. اختبار الإعدادات وتفعيل المستشفى</h3><span>Validation</span></div>
   <div class="step-status ${h.test_result?'done':''}"><span class="bullet"></span> اختبار توافق الملف مع إعدادات الربط</div>
-  <div class="step-status ${String(h.status).toLowerCase()==='configured'?'done':''}"><span class="bullet"></span> تفعيل المصدر لإدخاله في مسار المعالجة</div>
+  <div class="step-status ${String(h.status).toLowerCase()==='configured'?'done':''}"><span class="bullet"></span> اعتماد إعدادات المصدر بعد اجتياز الاختبار</div>
   <div class="form-actions">
    <button class="btn btn-outline" onclick="testHospital()">اختبار الإعدادات</button>
    <button class="btn btn-primary" onclick="activateHospital()">تفعيل المستشفى</button>
@@ -1161,13 +1161,13 @@ async function testHospital(){
  }
 }
 async function activateHospital(){
- if(!confirm("هل تريد تفعيل هذا المستشفى وإدخال ملفاته ضمن مصادر المعالجة؟"))return;
+if(!confirm("هل تريد اعتماد إعدادات هذا المستشفى بعد اجتياز الاختبار؟")) return;
  const target=document.getElementById("testResult");
  target.innerHTML='<div class="notice">جارٍ تفعيل المستشفى...</div>';
  try{
   const data=await api(`/hospitals/${encodeURIComponent(currentHospital)}/activate`,{method:"POST"});
-  target.innerHTML='<div class="notice">تم إرسال طلب التفعيل بنجاح.</div>';
-  toast("تم تفعيل المستشفى");
+  target.innerHTML='<div class="notice">تم اعتماد إعدادات المستشفى بنجاح.</div>';
+  toast("تم اعتماد إعدادات المستشفى");
   await loadHospitals();
   await openHospitalDetails(currentHospital);
  }catch(e){
