@@ -2,6 +2,7 @@
 from pathlib import Path
 from uuid import uuid4, uuid5, NAMESPACE_URL
 import yaml
+import json
 
 from canonical.models import (
     Patient,
@@ -401,7 +402,44 @@ def process_conflicts(patients: list[Patient]):
         conflicts.extend(clinical_conflicts)
 
     # Resolve all detected conflicts
+    patients_by_id = {patient.id: patient for patient in patients}
+
     for conflict in conflicts:
+
+        patient = patients_by_id[conflict.patient_id]
+
+        records = (
+            patient.observations
+            + patient.medications
+            + patient.allergies
+            + patient.diagnoses
+        )
+
+        record_data = sorted(
+            json.dumps(
+                record.model_dump(
+                    mode="json", exclude={"provenance"}
+                ),
+                sort_keys=True
+            )
+            for record in records
+            if record.id in conflict.record_ids
+        )
+
+        fingerprint = json.dumps({
+            "patient_id": conflict.patient_id,
+            "national_id": patient.national_id,
+            "field": conflict.field,
+            "type": conflict.conflict_type,
+            "records": record_data
+        }, sort_keys=True)
+
+        conflict.id = str(
+            uuid5(
+                NAMESPACE_URL,
+                f"urn:medbridge:conflict:{fingerprint}"
+            )
+        )
 
         resolution = resolve_conflict(conflict)
 
