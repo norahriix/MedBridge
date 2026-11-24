@@ -1,0 +1,6 @@
+fields:
+  medication_id: id
+  patient_id: source_patient_id
+  drug_name: name
+  dosage: dose
+  medication_status: status

@@ -1,0 +1,9 @@
+[
+    {
+        "medication_id": "MED002",
+        "patient_id": "B200",
+        "drug_name": "Metformin",
+        "dosage": "1000 mg",
+        "medication_status": "active"
+    }
+]
