@@ -18,6 +18,7 @@ from normalization.normalizer import normalize
 from normalization.units import normalize_weight
 from validation.validator import validate_patient
 from identity.matcher import match_patients
+from core.merger import merge_patients
 from provenance.tracker import track_provenance
 from conflicts.detector import detect_conflicts
 from conflicts.clinical_detector import detect_clinical_conflicts
@@ -511,6 +512,8 @@ def run_pipeline() -> PipelineResult:
             for patient in patients
             if "mock_hospital_fhir" not in patient.sources
         ])
+
+        patients = merge_patients(patients, matches)
 
         conflicts, resolutions = process_conflicts(patients)
 
