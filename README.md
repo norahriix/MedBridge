@@ -148,7 +148,7 @@ The project includes technical tests using synthetic datasets.
 | 5,000 | 15,000 | 2.190 sec | 2,283.10 patients/sec |
 | 10,000 | 30,000 | 4.674 sec | 2,139.30 patients/sec |
 
-These measurements cover connector conversion, not the complete end-to-end pipeline.
+These historical measurements cover FHIR connector conversion, not the complete end-to-end pipeline. They have not yet been revalidated after the latest bug fixes.
 
 ### Identity Matching Test
 
@@ -158,7 +158,7 @@ A synthetic test fixture containing 6 patients and 15 candidate pairs produced:
 - Recall: 100%
 - F1 Score: 100%
 
-These results apply only to the small synthetic test fixture and must not be interpreted as real-world patient matching accuracy.
+The identity matching audit counts MATCH and POSSIBLE_MATCH as positive detections. These results apply only to the six-patient synthetic fixture and its 15 candidate pairs. They do not represent confirmed identity matching accuracy or real-world clinical performance.
 
 ### Additional Tests
 

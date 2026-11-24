@@ -46,26 +46,47 @@ Separate existing Mock Hospital integration test:
 
 This integration test is separate from the small standalone format samples above.
 
+### Updated Pipeline Results After Bug Fixes
+
+- Patient records before merging: 1,004
+- Patient records after merging: 1,002
+- Identity comparisons: 6
+- Confirmed matching pairs: 3
+- Detected conflicts: 4
+- Within-source conflicts: 1
+- Cross-source conflicts: 3
+- Conflicts flagged for human review: 4
+- Exported FHIR resources: 9,010
+- Pipeline errors: 0
+- Source records with missing provenance: 0
+
+These results describe the current local synthetic-data pipeline test.
+They do not establish clinical accuracy or production readiness.
+
 ## 5. Important Limitations
 
-- Most standalone connectors were validated using only one synthetic patient.
-- CPCDS and BFD RIF samples are simplified format-inspired CSV datasets, not complete official datasets.
-- Accuracy percentages describe only the fields and samples tested.
-- These tests do not establish full standards compliance.
+- All datasets used for testing are synthetic.
+- Most standalone connectors were tested using one synthetic patient.
+- CPCDS and BFD RIF samples are simplified format-inspired datasets.
+- Accuracy results apply only to the tested samples and fields.
+- Full healthcare standards compliance has not been established.
 - Full OMOP vocabulary validation remains untested.
-- Identity matching precision, recall, and F1 remain untested.
-- Performance benchmarks and load testing remain untested.
-- Scalability at 5,000 and 10,000 patients remains untested.
-- Security and long-duration stability testing remain untested.
+- DICOM validation covers metadata only.
+- Identity matching was evaluated using a small synthetic fixture.
+- Previous FHIR conversion benchmarks covered 1,000, 5,000 and 10,000 patients.
+- Previous local concurrent API tests covered 5, 10 and 20 requests.
+- The historical performance results have not been revalidated after the latest bug fixes.
+- Production-scale performance, full security validation and long-duration stability remain untested.
 
 ## 6. Conclusion
 
-MedBridge successfully processed synthetic samples across nine standalone data formats.
-All executed connector tests reported zero source record errors.
-The tested field-level accuracy audits achieved 100%.
+MedBridge processed synthetic healthcare data across multiple formats.
 
-Further testing is required to establish standards compliance, identity matching quality,
-performance, scalability, security, and production readiness.
+Field-level accuracy results apply only to the tested samples.
+
+Historical benchmarks demonstrate preliminary technical feasibility, not production readiness.
+
+Further testing is required to establish full standards compliance, real-world identity matching accuracy, security and production scalability.
 
 ## FHIR PERFORMANCE BENCHMARK
 
