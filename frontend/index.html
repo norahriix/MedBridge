@@ -705,7 +705,7 @@ tbody tr:hover{background:#fbfdfd}
 
 <section class="page" id="page-conflicts">
  <div class="page-heading"><div><h1>مراجعة التعارضات</h1><p>مراجعة الحالات التي تتطلب قرارًا قبل اعتماد البيانات.</p></div><button class="btn btn-outline" onclick="loadConflicts()">↻ تحديث</button></div>
- <div class="notice">لا يتم دمج سجلات المرضى اعتمادًا على تشابه الأسماء فقط. تتم مراجعة الحالات غير المؤكدة قبل اتخاذ قرار الدمج.</div>
+ <div class="notice">يتم دمج سجلات المرضى التي تحقق قواعد التطابق المؤكد فقط، مع الاحتفاظ بالمصادر الأصلية وعدم دمج حالات التطابق المحتمل تلقائيًا.</div>
  <div class="table-card"><div class="table-toolbar"><div style="font-size:12px;font-weight:700">الحالات المسجلة</div></div>
   <div style="overflow:auto"><table><thead><tr><th>رقم التعارض</th><th>اسم المريض</th><th>نوع التعارض</th><th>التفاصيل</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="conflictsBody"><tr><td colspan="5" class="empty">جارٍ تحميل التعارضات...</td></tr></tbody></table></div>
  </div>
@@ -719,7 +719,7 @@ tbody tr:hover{background:#fbfdfd}
   <div class="integration-steps">
    <div class="step-card"><div class="step-num">1</div><strong>قراءة المصادر</strong><p>قراءة ملفات المصادر المتاحة.</p></div>
    <div class="step-card"><div class="step-num">2</div><strong>التحقق والتوحيد</strong><p>تطبيق قواعد التوحيد والتحقق.</p></div>
-   <div class="step-card"><div class="step-num">3</div><strong>المطابقة والنتائج</strong><p>تحديد المطابقات والتعارضات وإنتاج النتائج.</p></div>
+   <div class="step-card"><div class="step-num">3</div><strong>المطابقة والنتائج</strong><p>مطابقة الهوية ودمج السجلات المتطابقة واكتشاف التعارضات وإنتاج النتائج.</p></div>
   </div>
   <div style="margin-top:23px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
    <button class="btn btn-primary" id="runPipelineBtn" onclick="runPipeline()">▶ تشغيل المعالجة الآن</button>
@@ -1454,7 +1454,7 @@ function openPatientDetails(index) {
             </section>
 
             <div class="medical-footer">
-                البيانات المعروضة مستخرجة من السجل الموحد للمريض.
+               تعرض هذه الصفحة بيانات المريض بعد التوحيد ودمج السجلات المتطابقة، مع الاحتفاظ بمصادر البيانات الأصلية.
                 الأقسام التي لا تحتوي على بيانات تظهر بوضوح دون افتراض وجود تاريخ طبي غير مسجل.
             </div>
         </div>
