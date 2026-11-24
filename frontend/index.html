@@ -1293,7 +1293,7 @@ function openPatientDetails(index) {
             ${rows.map(([label, value]) => `
                 <div class="medical-row">
                     <span>${esc(label)}</span>
-                    <strong>${esc(value)}</strong>
+                    <strong><bdi dir="auto">${esc(value)}</bdi></strong>
                 </div>
             `).join("")}
         </article>
@@ -1670,7 +1670,7 @@ function openConflictReview(index) {
                 </strong>
 
                 <span>
-                    ${conflictReviewEscape(item.submittedValue)}
+                    <bdi dir="auto">${conflictReviewEscape(item.submittedValue)}</bdi>
                 </span>
             </span>
         </label>
