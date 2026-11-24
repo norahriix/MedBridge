@@ -1905,7 +1905,7 @@ async function runPipeline(){
 }
 function updateStats(){
  const h=hospitals.length,p=patients.length,c=conflicts.length;
- const m=Number(lastPipeline?.matches_count??lastPipeline?.matched_count??lastPipeline?.summary?.matches??0);
+ const m = (lastPipeline?.matches ?? []).filter(match => match.status === "MATCH").length;
  document.getElementById("statHospitals").textContent=h;
  document.getElementById("statPatients").textContent=p;
  document.getElementById("statMatches").textContent=m;
@@ -1915,7 +1915,7 @@ function updateStats(){
 function updateReports(){
  const values={
   reportHospitals:hospitals.length,reportPatients:patients.length,
-  reportMatches:Number(lastPipeline?.matches_count??lastPipeline?.matched_count??lastPipeline?.summary?.matches??0),
+  reportMatches:(lastPipeline?.matches ?? []).filter(match => match.status === "MATCH").length,
   reportConflicts:conflicts.length
  };
  Object.entries(values).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val});
