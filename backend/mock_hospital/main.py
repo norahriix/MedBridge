@@ -79,7 +79,7 @@ def generate_patient(index):
     first = FIRST_NAMES[(index - 1) % len(FIRST_NAMES)]
     last = LAST_NAMES[((index - 1) // len(FIRST_NAMES)) % len(LAST_NAMES)]
 
-    gender = "female" if index % 2 == 0 else "male"
+    gender = "female" if first in ("Sara", "Lina", "Nora", "Maha", "Huda", "Reem", "Amal", "Layla") else "male"
 
     birth_date = (
         date(1945, 1, 1)
