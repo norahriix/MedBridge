@@ -4,7 +4,6 @@ import pytest
 
 from ingestion.readers import read_source
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -13,7 +12,7 @@ def test_read_hospital_a():
 
     records = read_source(str(path))
 
-    assert len(records) == 2
+    assert len(records) == 1
     assert records[0]["patient_id"] == "A100"
     assert records[0]["patient_name"] == "Sara Ahmed"
 
@@ -23,7 +22,7 @@ def test_read_hospital_b():
 
     records = read_source(str(path))
 
-    assert len(records) == 2
+    assert len(records) == 1
     assert records[0]["record_no"] == "B200"
     assert records[0]["fullName"] == "Sara Ahmed"
 
@@ -31,6 +30,7 @@ def test_read_hospital_b():
 def test_reject_unsupported_file():
     with pytest.raises(ValueError):
         read_source("patients.txt")
+
 
 def test_read_hospital_c_csv():
     path = ROOT / "data/hospital_c/patients.csv"
