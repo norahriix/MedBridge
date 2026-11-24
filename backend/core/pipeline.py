@@ -148,6 +148,7 @@ def build_patients(results: list[dict], source: str):
 
         patient = Patient(
             id=f"{source}:{record['source_patient_id']}",
+            national_id=record.get("national_id"),
             name=record["name"],
             birth_date=record["birth_date"],
             gender=record["gender"],
